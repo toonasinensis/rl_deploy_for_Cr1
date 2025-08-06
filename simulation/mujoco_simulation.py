@@ -171,11 +171,11 @@ class MuJoCoSimulation:
                 step += 1
                 # 控制律
                 # print("self.arr_phase[0]", self.arr_phase[0])
-                if self.tau_ff[0] > 88   :
-                    self._apply_joint_torque()
-                else:
-                    self._apply_joint_torque()
-                    self._set_mimic_init_state()
+                # if self.tau_ff[0] > 88   :
+                self._apply_joint_torque()
+                # else:
+                #     self._apply_joint_torque()
+                #     self._set_mimic_init_state()
                 # 模拟一步
                 mujoco.mj_step(self.model, self.data)
                 

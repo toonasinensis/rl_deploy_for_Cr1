@@ -278,7 +278,7 @@ public:
         VecXf joint_vel_rl = VecXf(act_dim_);
         VecXf joint_pos_default = VecXf(act_dim_);// in rl squenece
 
-        std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;
+        // std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;
         if( data_cnt >= joint_data.size())
         {
             data_cnt = 0;//保持最后一帧数据
@@ -310,14 +310,14 @@ public:
         0.502f, 1.411f, 1.441f;
 
         joint_pos_rl = joint_pos_rl - joint_pos_default;
-        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, joint_data_now;
+        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, my_vec;
 
-        std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
-        std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;
-        std::cout<<"joint_pos_rl"<<joint_pos_rl.transpose()<<std::endl;
-        std::cout<<"joint_vel_rl"<<joint_vel_rl.transpose()<<std::endl;
-        std::cout<<"last_action_"<<last_action_.transpose()<<std::endl;
-        std::cout<<"des_joint"<<joint_data_now.transpose()<<std::endl;
+        // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
+        // std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;
+        // std::cout<<"joint_pos_rl"<<joint_pos_rl.transpose()<<std::endl;
+        // std::cout<<"joint_vel_rl"<<joint_vel_rl.transpose()<<std::endl;
+        // std::cout<<"last_action_"<<last_action_.transpose()<<std::endl;
+        // std::cout<<"des_joint"<<my_vec.transpose()<<std::endl;
 
         // make buffer :
         for (size_t i = 0; i < obs_history_num_ - 1; ++i) {
@@ -347,8 +347,8 @@ public:
         auto next_time = std::chrono::high_resolution_clock::now();
         // ra.tau_ff(0) = 999;
         auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(next_time - this_time).count();
-            std::cout << std::fixed << std::setprecision(4)\
-              << "infer Elapsed: " << duration2 << " us" << std::endl;
+            // std::cout << std::fixed << std::setprecision(4)\
+            //   << "infer Elapsed: " << duration2 << " us" << std::endl;
         return ra;
     }
 

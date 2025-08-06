@@ -90,14 +90,25 @@ public:
                         if(input=='x'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::WaitingForStand);
                         }
+                        if(input=='v'){
+                            usr_cmd_->target_mode = uint8_t(RobotMotionState::MimicReady);
+                        }
                         if(input=='c'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::RLControlMode);
                         }
                         if(input=='l'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::LieDown);
                         }
-
                     break;
+                    case RobotMotionState::MimicReady:
+                        if(input=='c'){
+                            usr_cmd_->target_mode = uint8_t(RobotMotionState::RLControlMode);
+                        }
+                        if(input=='z'){
+                            usr_cmd_->target_mode = uint8_t(RobotMotionState::StandingUp);
+                        }
+                    break;
+
                     case RobotMotionState::LieDown:
                         if(input=='z'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::StandingUp);

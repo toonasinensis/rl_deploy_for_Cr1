@@ -8,13 +8,13 @@
  * @copyright Copyright (c) 2024  DeepRobotics
  * 
  */
-#ifndef HUMANOID_STANDUP_STATE_HPP_
-#define HUMANOID_STANDUP_STATE_HPP_
+#ifndef HUMANOID_MIMIC_STATE_HPP_
+#define HUMANOID_MIMIC_STATE_HPP_
 
 #include "state_base.h"
 
 namespace humanoid{
-class TestState : public StateBase{
+class MimicReadyState : public StateBase{
 private:
     VecXf init_joint_pos_, init_joint_vel_, current_joint_pos_, current_joint_vel_;
     float time_stamp_record_, run_time_;
@@ -53,16 +53,16 @@ private:
     }
 
 public:
-    TestState(const RobotName& robot_name, const std::string& state_name, 
+    MimicReadyState(const RobotName& robot_name, const std::string& state_name, 
         std::shared_ptr<ControllerData> data_ptr):StateBase(robot_name, state_name, data_ptr){
             stand_duration_ = cp_ptr_->stand_duration_;
         }
-    ~TestState(){}
+    ~MimicReadyState(){}
 
     virtual void OnEnter() {
         GetRobotJointValue();
         RecordJointData();
-        StateBase::msfb_.UpdateCurrentState(RobotMotionState::StandingUp);
+        StateBase::msfb_.UpdateCurrentState(RobotMotionState::MimicReady);
     };
     virtual void OnExit() {
     }
@@ -76,9 +76,11 @@ public:
         joint_cmd_ = MatXf::Zero(cp_ptr_->dof_num_, 5);
         goal_joint_pos_ = VecXf::Zero(cp_ptr_->dof_num_);
 
-        // goal_joint_pos_<<  -0.038, 0.051, 0.094, -0.248, 0.156, -0.316, 1.379, 0., 0., 0.,
-        //     -0.276, -0.203, 0.232, 1.332, 0., 0., 0., -0.1, 0.005, -0.031,
-        //     0.182, 0.087, -0.085, -0.058, -0.002, -0.079, 0.165, 0.123, 0.227;
+        goal_joint_pos_<<  -0.038, 0.051, 0.094, -0.248, 0.156, -0.316, 1.379, 0., 0., 0.,
+            -0.276, -0.203, 0.232, 1.332, 0., 0., 0., -0.1, 0.005, -0.031,
+            0.182, 0.087, -0.085, -0.058, -0.002, -0.079, 0.165, 0.123, 0.227;
+
+
         //-------------------关节测试-----------------//
         float init_time = 3.;
         float t = run_time_ - time_stamp_record_-init_time;
@@ -126,10 +128,10 @@ public:
             std::cout << "safe_control_mode:" << uc_ptr_->GetUserCommand()->safe_control_mode << std::endl;
             return StateName::kJointDamping;
         }
+        if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::StandingUp)) return StateName::kStandUp;
         if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::WaitingForStand)) return StateName::kIdle;
-        if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::MimicReady)) return StateName::kMimicReady;
         if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::RLControlMode)) return StateName::kRLControl;
-        return StateName::kStandUp;
+        return StateName::kMimicReady;
     }
 };
 

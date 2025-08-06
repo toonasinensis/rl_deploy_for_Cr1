@@ -42,6 +42,7 @@ namespace types{
         StartDamping    = 3,
         LieDown         = 4,
         RLControlMode   = 6,
+        MimicReady      = 7,
     };
 
     enum RobotGaitType{
@@ -56,6 +57,7 @@ namespace types{
         kStartDamping = 3,
         kLieDown      = 4,
         kRLControl    = 6,
+        kMimicReady   = 7,
     };
 
     enum RemoteCommandType{

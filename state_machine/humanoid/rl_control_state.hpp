@@ -168,6 +168,8 @@ public:
             std::cout << "safe_control_mode:" << uc_ptr_->GetUserCommand()->safe_control_mode << std::endl;
             return StateName::kJointDamping;
         }
+        if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::JointDamping)) return StateName::kJointDamping;
+
         if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::WaitingForStand)) return StateName::kIdle;
         return StateName::kRLControl;
     }
