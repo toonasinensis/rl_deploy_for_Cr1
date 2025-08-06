@@ -1,0 +1,143 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(rl_deploy)
+# set(CMAKE_BUILD_TYPE Release)
+add_definitions(-w) # warning ignore
+add_compile_options(-fPIC)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_BUILD_TYPE Debug)  # 自动包含 -g 选项
+
+set(BUILD_PLATFORM "arm" CACHE STRING "select build cpu type")
+option(BUILD SIM OFF)
+option(SEND_REMOTE OFF)
+if (BUILD_PLATFORM STREQUAL arm)
+  message("this is arm platform")
+  # set(BUILD_SIM OFF)
+  set(CMAKE_C_COMPILER "aarch64-linux-gnu-gcc")
+  set(CMAKE_CXX_COMPILER "aarch64-linux-gnu-g++") 
+else()
+  message("this is x86 platform")
+endif()
+set(CMAKE_CXX_STANDARD 17)
+
+include(config.cmake)
+if (SEND_REMOTE)
+  set(BUILD_SIM OFF)
+endif()
+
+message("BUILD_PLATFORM: ${BUILD_PLATFORM}")
+message("BUILD_SIM:      ${BUILD_SIM}")
+message("SEND_REMOTE:    ${SEND_REMOTE}")
+
+get_filename_component(WORKSPACE_DIR ./ ABSOLUTE)
+set(THIRD_PARTY ${WORKSPACE_DIR}/third_party)
+
+ 
+
+set(DR_LIB_PATH ${THIRD_PARTY}/dr_lib/${BUILD_PLATFORM})
+# message(${DR_LIB_PATH})
+include_directories(
+  ${DR_LIB_PATH}/drdds/include/dridl
+  ${DR_LIB_PATH}/drdds/include
+  ${DR_LIB_PATH}/drdds/
+
+  ${DR_LIB_PATH}/log4cplus/include/
+  ${DR_LIB_PATH}/log4cplus/include/log4cplus_dr/
+)
+set(CMAKE_PREFIX_PATH ${DR_LIB_PATH}/drdds/lib/)
+
+# ## 2. set all include folders
+# find_package(fastcdr REQUIRED)
+# find_package(fastrtps REQUIRED)
+link_directories(
+  ${DR_LIB_PATH}/drdds/
+  ${DR_LIB_PATH}/drdds/lib
+  ${DR_LIB_PATH}/log4cplus/lib
+)
+list(APPEND dr_lib ${DR_LIB_PATH}/drdds/lib/libfastcdr.so)
+list(APPEND dr_lib ${DR_LIB_PATH}/drdds/lib/libfastrtps.so)
+list(APPEND dr_lib ${DR_LIB_PATH}/drdds/lib/libfoonathan_memory-0.7.3.so)
+list(APPEND dr_lib ${DR_LIB_PATH}/drdds/lib/libssl.so)
+list(APPEND dr_lib ${DR_LIB_PATH}/drdds/lib/libcrypto.so)
+# list(APPEND dr_lib ${DR_LIB_PATH}/drdds/lib/libtinyxml2.so)
+list(APPEND dr_lib ${DR_LIB_PATH}/drdds/libdrdds.so)
+list(APPEND dr_lib ${DR_LIB_PATH}/log4cplus/lib/liblog4cplus.so)
+
+message("${dr_lib}")
+
+include_directories(
+  ${THIRD_PARTY}/eigen/
+  ${THIRD_PARTY}/gamepad/include
+  ${THIRD_PARTY}/x30_motion_sdk/include
+  ${THIRD_PARTY}/Lite3_MotionSDK/include
+  types
+  utils
+  interface/robot
+  interface/user_command
+  state_machine
+  run_policy
+  ${THIRD_PARTY}/onnxruntime/${BUILD_PLATFORM}/include
+)
+
+link_directories(
+  ${DR_LIB_PATH}/drdds/lib/
+)
+
+
+add_subdirectory(interface)
+
+if (BUILD_SIM)
+add_definitions(-DSIMULATION_MODE)
+endif()
+
+# if (SEND_REMOTE)
+#   set(PATH_LIB "../lib")
+#   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+#   set(CMAKE_INSTALL_RPATH ${PATH_LIB}/onnxruntime/)
+#   # set(CMAKE_INSTALL_RPATH ${PATH_LIB}/onnxruntime/)
+# endif()
+
+
+file(GLOB_RECURSE STATE_MACHINE_SRC "state_machine/*.c*")
+
+add_executable(rl_deploy main.cpp ${STATE_MACHINE_SRC} ${RUN_POLICY_SRC} ${RECORDER_PATH})
+
+if (BUILD_PLATFORM STREQUAL arm)
+  add_library(onnxruntime SHARED IMPORTED)
+  set_target_properties(onnxruntime PROPERTIES IMPORTED_LOCATION "${THIRD_PARTY}/onnxruntime/${BUILD_PLATFORM}/lib/libonnxruntime.so")
+else()
+  add_library(onnxruntime SHARED IMPORTED)
+  set_target_properties(onnxruntime PROPERTIES IMPORTED_LOCATION "${THIRD_PARTY}/onnxruntime/${BUILD_PLATFORM}/lib/libonnxruntime.so")
+endif()
+# find_package(tinyxml2 REQUIRED)
+
+target_link_libraries(rl_deploy interface dw   -lpthread -lm -lrt -ldl  -lstdc++ ${dr_lib} onnxruntime)
+# target_link_libraries(dw_test
+#         dw
+#         )
+if (BUILD_SIM)
+  message("build simulation")
+endif()
+
+# set(CMAKE_EXE_LINKER_FLAGS "-Wl,--disable-new-dtags")
+# set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+# set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# set(CMAKE_INSTALL_RPATH 
+#   ${DR_LIB_PATH}/drdds/lib/ 
+#   ${DR_LIB_PATH}/drdds/ 
+#   ${DR_LIB_PATH}/log4cplus/lib/ 
+#   ${THIRD_PARTY}/onnxruntime/${BUILD_PLATFORM}/lib/
+#   ../lib/onnxruntime/)
+
+
+if (SEND_REMOTE)
+  add_custom_target(push_to_robot ALL DEPENDS rl_deploy)
+  add_custom_command(
+    TARGET push_to_robot POST_BUILD
+    COMMAND ./scripts/sftp_to_remote.sh
+    WORKING_DIRECTORY ..
+    COMMENT "run sftp_to_remote.sh"
+  )
+endif()
+
+# install(TARGETS rl_deploy RUNTIME DESTINATION ${CPACK_PACKAGING_INSTALL_PREFIX}/bin)

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+sudo chmod +x /home/ysc/dros/rl_deploy/scripts/run.sh
+sudo cp /home/ysc/dros/rl_deploy/scripts/rl_deploy.service /lib/systemd/system/
+
+systemctl daemon-reload
+
+systemctl enable rl_deploy.service
+systemctl restart rl_deploy.service

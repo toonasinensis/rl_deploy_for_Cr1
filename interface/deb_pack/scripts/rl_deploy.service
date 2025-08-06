@@ -1,0 +1,10 @@
+[Unit]
+Description=rl_deploy
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/ysc/dros/rl_deploy/scripts/run.sh
+
+[Install]
+WantedBy=network.target

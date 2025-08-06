@@ -39,3 +39,4 @@
 
 # debug information files
 *.dwo
+"third_party/gamepad/"

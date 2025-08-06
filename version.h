@@ -1,0 +1,10 @@
+#define  RLDEPLOY_VERSION_INTERFACE 0
+#define  RLDEPLOY_VERSION_MINOR 0 
+#define  RLDEPLOY_VERSION_PATCH 1
+#define  RLDEPLOY_VERSION_BUILD 001 
+#define  RLDEPLOY_VERSION_NAME "RLDEPLOY Version 0.0.1(001)" 
+
+/*
+#version 0.0.1(001)此版本开始为人型算法二次开发包
+[+]init
+*/
