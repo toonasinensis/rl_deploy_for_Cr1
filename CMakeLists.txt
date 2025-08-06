@@ -22,6 +22,12 @@ if (SEND_REMOTE)
     set(BUILD_SIM OFF)
 endif ()
 
+if (BUILD_SIM)
+# 全局定义宏（对所有目标生效）
+add_definitions(-DSIMULATION_MODE)
+# 或赋值：add_definitions(-DSIMULATION_MODE=1)
+endif()
+
 message("BUILD_PLATFORM: ${BUILD_PLATFORM}")
 message("BUILD_SIM:      ${BUILD_SIM}")
 message("SEND_REMOTE:    ${SEND_REMOTE}")

@@ -122,7 +122,7 @@ private:
     }
 
     bool IsJointDataNormal(){
-        return true;
+        // return true;
         double ri_ts_ = ri_ptr_->GetInterfaceTimeStamp();// / 1000.;
         VecXf joint_pos = ri_ptr_->GetJointPosition();
         VecXf joint_vel = ri_ptr_->GetJointVelocity();

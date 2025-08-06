@@ -28,7 +28,7 @@
 #include "data_streaming.hpp"
 #include "safe_controller.hpp"
 #include "mimic_ready_state.hpp"
-#define SIMULATION_MODE
+// #define SIMULATION_MODE
 namespace humanoid{
 class HumanoidStateMachine : public StateMachineBase{
 private:

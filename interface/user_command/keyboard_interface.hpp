@@ -93,7 +93,7 @@ public:
                         if(input=='v'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::MimicReady);
                         }
-                        if(input=='c'){
+                        if(input=='/'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::RLControlMode);
                         }
                         if(input=='l'){
@@ -101,7 +101,7 @@ public:
                         }
                     break;
                     case RobotMotionState::MimicReady:
-                        if(input=='c'){
+                        if(input=='/'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::RLControlMode);
                         }
                         if(input=='z'){

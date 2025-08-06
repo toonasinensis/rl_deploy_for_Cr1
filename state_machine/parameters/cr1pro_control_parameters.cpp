@@ -188,6 +188,7 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
 
     neck_kp  <<0.,0.;
     neck_kd  <<0.,0.;
+    
     std::cout << "joint_kp:\n" << joint_kp.transpose() << std::endl;
     std::cout << "waist_kd:\n" << waist_kd.transpose() << std::endl;
     std::cout << "arm_kp:\n" << arm_kp.transpose() << std::endl;
