@@ -47,7 +47,7 @@ private:
 
     int obs_dim_, obs_history_num_, act_dim_;
     // int obs_history_num_ = 5;
-    int dof_dim = 29;
+    int dof_dim = 31;
     int obs_total_dim_;
     int capture_point_num_ = 22;
     VecXf current_observation_;
@@ -78,7 +78,7 @@ private:
     "left_hip_y_joint", "left_hip_x_joint", "left_hip_z_joint",
     "left_knee_joint", "left_ankle_y_joint", "left_ankle_x_joint",
     "right_hip_y_joint", "right_hip_x_joint", "right_hip_z_joint",
-    "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint"
+    "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint","neck1","neck2"
 };
 
     std::vector<std::string> policy_order = {
@@ -95,7 +95,7 @@ private:
 
     std::vector<std::string> pd_order = {
         "left_wrist_z_joint", "left_wrist_y_joint", "left_wrist_x_joint",
-        "right_wrist_z_joint", "right_wrist_y_joint", "right_wrist_x_joint"
+        "right_wrist_z_joint", "right_wrist_y_joint", "right_wrist_x_joint","neck1","neck2"
     };
     std::vector<std::string> policy_and_pd_order;// = {'left_hip_y_joint', 'right_hip_y_joint', 'waist_z_joint', 'left_hip_x_joint', 'right_hip_x_joint', 'waist_x_joint', 'left_hip_z_joint', 'right_hip_z_joint', 'waist_y_joint', 'left_knee_joint', 'right_knee_joint', 'left_shoulder_y_joint', 'right_shoulder_y_joint', 'left_ankle_y_joint', 'right_ankle_y_joint', 'left_shoulder_x_joint', 'right_shoulder_x_joint', 'left_ankle_x_joint', 'right_ankle_x_joint', 'left_shoulder_z_joint', 'right_shoulder_z_joint', 'left_elbow_joint', 'right_elbow_joint'};    // B
     std::vector<float> values;             // values in A
@@ -178,8 +178,8 @@ public:
     robot2policy_idx = generate_permutation(robot_order, policy_order);
     policyandpd2robot_idx = generate_permutation(policy_and_pd_order, robot_order);
 
-    if (!loader.load("/home/tian/Desktop/learn/imation/deploy/rl_deploy/policy/data/data_output.json")) {
-            std::cout<<"no data file"<<std::endl;
+    if (!loader.load("config/data_output.json")) {
+            std::cerr<<"no data file"<<std::endl;
      }
      else{
         if (loader.get_key_data("des_joint_pos", joint_data)) {
@@ -279,7 +279,7 @@ public:
         VecXf joint_vel_rl = VecXf(act_dim_);
         VecXf joint_pos_default = VecXf(act_dim_);// in rl squenece
 
-
+        std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;
         if( data_cnt >= joint_data.size())
         {
             data_cnt = 0;//保持最后一帧数据

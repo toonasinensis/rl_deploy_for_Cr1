@@ -16,7 +16,7 @@ int main(){
 
     DrDDSManager::Init({0}, "50/1", "ECAN");
     // std::shared_ptr<StateMachineBase> fsm = std::make_shared<humanoid::HumanoidStateMachine>(RobotName::CR1LEG, RemoteCommandType::kKeyBoard);
-    std::shared_ptr<StateMachineBase> fsm = std::make_shared<humanoid::HumanoidStateMachine>(RobotName::CR1B, RemoteCommandType::kKeyBoard);
+    std::shared_ptr<StateMachineBase> fsm = std::make_shared<humanoid::HumanoidStateMachine>(RobotName::CR1Pro, RemoteCommandType::kKeyBoard);
 
     fsm->Start();
     fsm->Run();

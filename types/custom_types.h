@@ -9,9 +9,11 @@ namespace types{
         CR1LEG,
         CR1A,
         CR1B,
+        CR1Pro,
+        CR1Standard,
     };
 
-    enum RobotType{//TODO:没发现这玩意有啥用
+    enum RobotType{
         HumanoidArm,
         HumanoidLeg,
         HumanoidStandard,
@@ -23,9 +25,9 @@ namespace types{
             return RobotType::HumanoidArm;
         }else if(int(robot_name) == int(RobotName::CR1LEG)){
             return RobotType::HumanoidLeg;
-        }else if(int(robot_name) == int(RobotName::CR1A)){
+        }else if(int(robot_name) == int(RobotName::CR1Standard)){
             return RobotType::HumanoidStandard;
-        }else if(int(robot_name) == int(RobotName::CR1B)){
+        }else if(int(robot_name) == int(RobotName::CR1Pro)){
             return RobotType::HumanoidPro;
         }else{
             return RobotType::HumanoidLeg;

@@ -3,6 +3,7 @@
 ## 下载编译
 
 ```bash
+
 mkdir build && cd build
 cmake .. -DBUILD_PLATFORM=arm -DSEND_REMOTE=ON 
 cmake .. -DBUILD_PLATFORM=x86 -DSEND_REMOTE=OFF

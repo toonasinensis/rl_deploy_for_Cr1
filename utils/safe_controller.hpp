@@ -122,8 +122,8 @@ private:
     }
 
     bool IsJointDataNormal(){
+        return true;
         double ri_ts_ = ri_ptr_->GetInterfaceTimeStamp();// / 1000.;
-        // std::cout<<"ri_ts_: "<<ri_ts_<<std::endl;
         VecXf joint_pos = ri_ptr_->GetJointPosition();
         VecXf joint_vel = ri_ptr_->GetJointVelocity();
         VecXf joint_tau = ri_ptr_->GetJointTorque();
@@ -135,11 +135,6 @@ private:
             last_joint_vel_ = joint_vel;
             last_joint_tau_ = joint_tau;
         }
-
-        // if (last_ri_ts_ == ri_ts_)
-        // {
-        //     std::cout<<"similar time "<<ri_ts_<<std::endl;
-        // }
         // std::cout << "ri_ts: "<< ri_ts_<<std::endl;
         // std::cout <<"check: "<< ri_check_time_/1000.<<std::endl;
         bool res = true;
@@ -162,7 +157,6 @@ private:
                 robot_error_state_.joint_num_error = 1;
                 res = false;
             }
-            // 
             if(joint_pos(i)==last_joint_pos_(i) && joint_vel(i)==last_joint_vel_(i) && joint_tau(i)==last_joint_tau_(i)){
                 joint_data_same_cnt_[i]++;
             }else{
@@ -176,9 +170,9 @@ private:
             }
             if(joint_data_same_cnt_[i]>30){
                 // std::cerr << "joint " << i << " data is not update" << std::endl;
-                // robot_error_state_.joint_num_error = 1;
-                // joint_update_state_ |= (1 << i);
-                // res = false;
+                robot_error_state_.joint_num_error = 1;
+                joint_update_state_ |= (1 << i);
+                res = false;
             }
         }
         // ri_check_time_ = ri_ts_;
@@ -360,11 +354,6 @@ public:
     }
 
     void Run(){
-        //test
-    //     using Clock = std::chrono::steady_clock;
-    // auto start_time = Clock::now();
-        auto last_time = std::chrono::steady_clock::now();
-
         int tfd;    //定时器描述符
         int efd;    //epoll描述符
         int fds;
@@ -390,7 +379,6 @@ public:
             close(tfd);
             close(efd);
         }
-        
 
         ev.data.fd = tfd; 
         ev.events = EPOLLIN;    //监听定时器读事件，当定时器超时时，定时器描述符可读。
@@ -408,18 +396,13 @@ public:
             run_cnt_++;
             int safe_control_mode = 0;
             current_time_ = GetTimestampMs();
-            // std::cout<<"current_time_"<<current_time_<<std::endl;
-
-
-
             if(!IsDriverStatusNormal()){
                 usr_cmd_->safe_control_mode = 2; //3;
                 driver_error_ts_ = current_time_;
             }
-            if(!IsJointDataNormal()&& false){
+            if(!IsJointDataNormal()){
                 usr_cmd_->safe_control_mode = 3;
                 joint_data_error_ts_ = current_time_;
-                // std::cout<<""
             }
             if(run_cnt_%1000==0 && !IsMotorTempertureNormal()){
                 usr_cmd_->safe_control_mode = 2;
@@ -442,15 +425,7 @@ public:
                 } 
                 last_error_code_ = robot_error_state_.error_code;
             }
-
-            auto now = std::chrono::steady_clock::now();
-            std::chrono::duration<double, std::milli> diff = now - last_time;
-            // std::cout << "Interval: " << std::chrono::duration<double, std::micro>(diff).count() << " us\n";
-
-            last_time = now;
-
         }
-        
     }
 
     void Stop(){

@@ -34,7 +34,14 @@ URDF_INIT = {
 
 from multiprocessing import shared_memory
 import numpy as np
- 
+virtual_joint_num = {
+    "k1w": 0,
+    "m20": 0,
+    "CR1LEG": 0,
+    "CR1PRO": 2,
+    "CR1STANDARD": 0,
+}
+
 
 
 class MuJoCoSimulation:
@@ -44,6 +51,10 @@ class MuJoCoSimulation:
                  local_port: int = LOCAL_PORT,
                  ctrl_ip: str = CTRL_IP,
                  ctrl_port: int = CTRL_PORT):
+
+
+        self.robot_name = "CR1PRO"
+
 
         # UDP 通信
         self.recive_bool = True
@@ -82,6 +93,12 @@ class MuJoCoSimulation:
         self.last_base_linvel = np.zeros((3, 1), np.float64)
         self.timestamp = 0.0
         self.timestamp_last = 0
+
+        self.virtual_joint_num = virtual_joint_num[self.robot_name]
+        if virtual_joint_num[self.robot_name] > 0:
+            self.virtual_joint = np.zeros(virtual_joint_num[self.robot_name])
+        else:
+            self.virtual_joint = None
 
         print(f"[INFO] MuJoCo model loaded, dof = {self.dof_num}")
 
@@ -186,22 +203,34 @@ class MuJoCoSimulation:
         12f kp | 12f pos | 12f kd | 12f vel | 12f tau  = 240 bytes
         """
         # fmt = "12f" * 5
-        fmt = f'{self.dof_num}f' * 5
+        if self.virtual_joint is not None:
+            fmt = f'{self.dof_num+self.virtual_joint_num}f' * 5
+            joint_all_num = self.dof_num + self.virtual_joint_num
+        else:
+            fmt = f'{self.dof_num}f' * 5
+            joint_all_num = self.dof_num
         expected = struct.calcsize(fmt)  # 240
         while True:
+
             data, addr = self.recv_sock.recvfrom(expected)
             if len(data) < expected:
                 print(f"[WARN] UDP packet size {len(data)} != {expected}")
                 continue
             unpacked = struct.unpack(fmt, data)
-            self.kp_cmd = np.asarray(unpacked[0:self.dof_num], dtype=np.float32).reshape(self.dof_num, 1)
-            self.pos_cmd = np.asarray(unpacked[self.dof_num:self.dof_num * 2], dtype=np.float32).reshape(self.dof_num,
-                                                                                                         1)
-            self.kd_cmd = np.asarray(unpacked[self.dof_num * 2:self.dof_num * 3], dtype=np.float32).reshape(
-                self.dof_num, 1)
-            self.vel_cmd = np.asarray(unpacked[self.dof_num * 3:self.dof_num * 4], dtype=np.float32).reshape(
-                self.dof_num, 1)
-            self.tau_ff = np.asarray(unpacked[self.dof_num * 4:], dtype=np.float32).reshape(self.dof_num, 1)
+
+
+            if self.virtual_joint  is not None:
+            
+                self.kp_cmd = np.asarray(unpacked[0:joint_all_num], dtype=np.float32).reshape(joint_all_num, 1)[:-2]
+                self.pos_cmd = np.asarray(unpacked[joint_all_num:joint_all_num * 2], dtype=np.float32).reshape(joint_all_num,1 )[:-2]
+                self.kd_cmd = np.asarray(unpacked[joint_all_num * 2:joint_all_num * 3], dtype=np.float32).reshape(
+                    joint_all_num, 1)[:-2]
+                self.vel_cmd = np.asarray(unpacked[joint_all_num * 3:joint_all_num * 4], dtype=np.float32).reshape(
+                    joint_all_num, 1)[:-2]
+                self.tau_ff = np.asarray(unpacked[joint_all_num * 4:], dtype=np.float32).reshape(joint_all_num, 1)[:-2]
+
+ 
+
             # print(f"[UDP] cmd from {addr}")
             # print("kp",self.kp_cmd.transpose())
             # print("kd",self.kd_cmd.transpose())
@@ -324,6 +353,28 @@ class MuJoCoSimulation:
             tau,
         ]).astype(np.float32)
         # print(self.timestamp)
+
+        if self.virtual_joint is None:
+            payload = np.concatenate([
+                [self.timestamp],
+                rpy.flatten(),
+                body_acc.flatten(),
+                angvel_b.flatten(),
+                q.flatten(),
+                dq.flatten(),
+                tau.flatten()
+            ])
+        else:
+            payload = np.concatenate([
+                [self.timestamp],
+                rpy.flatten(),
+                body_acc.flatten(),
+                angvel_b.flatten(),
+                np.concatenate([q.flatten(), self.virtual_joint]),
+                np.concatenate([dq.flatten(), self.virtual_joint]),
+                np.concatenate([tau.flatten(), self.virtual_joint]),
+            ])
+
         self.pyload_old = payload
 
         fmt = "1d" + f"{len(payload) - 1}f"

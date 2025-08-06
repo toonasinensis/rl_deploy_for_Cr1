@@ -35,7 +35,7 @@ private:
 
     bool JointDataNormalCheck(){//TODO: temeropal unuse the check
     return true;
-        VecXf joint_pos_lower(cp_ptr_->dof_num), joint_pos_upper(cp_ptr_->dof_num);
+        VecXf joint_pos_lower(cp_ptr_->dof_num_), joint_pos_upper(cp_ptr_->dof_num_);
         joint_pos_lower <<cp_ptr_->waist_joint_lower_;
         joint_pos_upper << cp_ptr_->waist_joint_upper_;
         joint_pos_lower << cp_ptr_->leg_joint_lower_, cp_ptr_->leg_joint_lower_;
@@ -50,8 +50,8 @@ private:
         // std::cout<<"joint_pos_lower:"<<joint_pos_lower.transpose()<<std::endl;
         // std::cout<<"joint_pos_upper:"<<joint_pos_upper.transpose()<<std::endl;
         //---正负待根据实际安装确认---//
-        std::cout<<joint_pos_.size()<<"cp_ptr_->dof_num"<<cp_ptr_->dof_num<<std::endl;
-        for(int i=0;i<cp_ptr_->dof_num;++i){
+        std::cout<<joint_pos_.size()<<"cp_ptr_->dof_num"<<cp_ptr_->dof_num_<<std::endl;
+        for(int i=0;i<cp_ptr_->dof_num_;++i){
             if(std::isnan(joint_pos_lower(i)) || joint_pos_(i) > joint_pos_upper(i)+0.1 || joint_pos_(i) < joint_pos_lower(i)-0.1) {
                 // std::cout << "joint pos " << i << " : " << joint_pos_(i) << " | " 
                 //                                         << joint_pos_lower(i) << " " << joint_pos_upper(i) << std::endl;
@@ -130,7 +130,7 @@ public:
         //     DisplayProprioceptiveInfo();
         //     DisplayAxisValue();
         // }
-        MatXf cmd = MatXf::Zero(cp_ptr_->dof_num, 5);
+        MatXf cmd = MatXf::Zero(cp_ptr_->dof_num_, 5);
         // cmd(6,4)=1.2;
         if(cnt%4000==0){
         DisplayProprioceptiveInfo();

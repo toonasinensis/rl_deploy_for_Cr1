@@ -22,7 +22,7 @@ private:
     void GenerateCR1ARMParameters();
     void GenerateCR1LEGParameters();
     void GenerateCR1Parameters();
-    void GenerateCR1BParameters();
+    void GenerateCR1PROParameters();
     // void GenerateCR1BParametersFromURDF(const std::string& urdf_file);
     // void ParseURDF(const std::string& urdf_file);
 
@@ -32,7 +32,7 @@ public:
         if(robot_name==RobotName::CR1ARM) GenerateCR1ARMParameters();
         else if(robot_name==RobotName::CR1LEG) GenerateCR1LEGParameters();
         else if(robot_name==RobotName::CR1A) GenerateCR1Parameters();
-        else if(robot_name==RobotName::CR1B) GenerateCR1BParameters();//GenerateCR1BParametersFromURDF("/home/tian/Desktop/learn/imation/deploy/rl_deploy/simulation/urdf_model/CR01B-pro/B-20250522.urdf");
+        else if(robot_name==RobotName::CR1Pro) GenerateCR1PROParameters();//GenerateCR1BParametersFromURDF("/home/tian/Desktop/learn/imation/deploy/rl_deploy/simulation/urdf_model/CR01B-pro/B-20250522.urdf");
         else{
             std::cerr << "Not Deafult Robot" << std::endl;
         }
@@ -42,7 +42,11 @@ public:
     /**
      * @brief robot dof numbers
      */
-    int dof_num;
+    int dof_num_ = 31;
+    int waist_dof_num_ = 3;
+    int arm_dof_num_ = 7;
+    int leg_dof_num_ = 6;
+    int neck_dof_num_ = 2;
 
     /**
      * @brief robot link length
@@ -134,6 +138,7 @@ public:
      * @brief human leg joint kd
      */
     Vec6f leg_kd;
+ 
 
     /**
      * @brief human leg link length

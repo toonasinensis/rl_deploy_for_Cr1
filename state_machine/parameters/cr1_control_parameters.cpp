@@ -1,7 +1,7 @@
 #include "control_parameters.h"
 
 void ControlParameters::GenerateCR1Parameters(){//A样机只有臂和腿
-    dof_num = 26;
+    dof_num_ = 26;
 
     arm_joint_lower_ = VecXf::Zero(7);
     arm_joint_upper_ = VecXf::Zero(7);

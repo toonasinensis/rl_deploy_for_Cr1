@@ -33,7 +33,7 @@ namespace interface {
         bool start_thread_flag_ = false;
         std::thread sim_thread_, send_thread_;
     public:
-        CR1_PRO_WBC_SimInterface(const std::string &name, int dof_num = 29) : RobotInterface(name, dof_num) {
+        CR1_PRO_WBC_SimInterface(const std::string &name, int dof_num = 31) : RobotInterface(name, dof_num) {
             // run_cnt_ = 0;
             // gravity_ = projected_gravity;
             joint_pos_ = VecXf::Zero(dof_num_);
@@ -83,6 +83,7 @@ namespace interface {
         }
 
         virtual Vec3f GetImuBodyOmega() {
+            std::cout<<"nmsl"<<std::endl;
             return omega_body_;
         }
 

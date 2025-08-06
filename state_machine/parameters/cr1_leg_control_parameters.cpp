@@ -1,7 +1,7 @@
 #include "control_parameters.h"
 
 void ControlParameters::GenerateCR1LEGParameters(){
-    dof_num = 12;
+    dof_num_ = 12;
 
     joint_vel_limit_ = VecXf::Zero(6);
     torque_limit_ = VecXf::Zero(6);

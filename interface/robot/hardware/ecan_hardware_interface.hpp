@@ -24,8 +24,9 @@ struct JointConfig{
 
 class EcanHardwareInterface : public RobotInterface{
 protected:
-    double ri_ts_, imu_ts_;
-    Vec3f omega_body_, rpy_, acc_;
+    double ri_ts_, imu_leg_ts_, imu_body_ts_;
+    Vec3f omega_body_, rpy_body_, acc_body_;
+    Vec3f omega_leg_, rpy_leg_, acc_leg_;
     VecXf joint_pos_, joint_vel_, joint_tau_;
     VecXf motor_temperture_, driver_temperture_;
     float *pos_offset_;
@@ -41,8 +42,9 @@ protected:
 
     ChannelJointsData* joint_cmd_pub_;  
     ChannelJointsData* joint_data_sub_;
-    ChannelImuData* imu_data_sub_;
-    ChannelExeHealth* health_data_sub;
+    ChannelImuData* imu_leg_data_sub_;
+    ChannelImuData* imu_body_data_sub_;
+    ChannelExeHealth* health_data_sub_;
 
     bool IsDataUpdatedFinished(){
         bool res = data_updated_[0];
@@ -113,7 +115,9 @@ public:
 
         joint_cmd_pub_ = new ChannelJointsData("/JOINTS_CMD", 0);
         joint_data_sub_ = new ChannelJointsData(std::bind(&EcanHardwareInterface::Handler, this, std::placeholders::_1), "/JOINTS_DATA", 0);
-        imu_data_sub_ = new ChannelImuData(std::bind(&EcanHardwareInterface::HandlerIMU, this, std::placeholders::_1), "/IMU_DATA", 0);
+        imu_leg_data_sub_ = new ChannelImuData(std::bind(&EcanHardwareInterface::HandlerIMULeg, this, std::placeholders::_1), "/IMU_DATA_LEG", 0);
+        imu_body_data_sub_ = new ChannelImuData(std::bind(&EcanHardwareInterface::HandlerIMUBody, this, std::placeholders::_1), "/IMU_DATA_BODY", 0);
+        health_data_sub_ = new ChannelExeHealth(std::bind(&EcanHardwareInterface::HandlerHealth, this, std::placeholders::_1), "/BATTERY_DATA", 0);
 
         sleep(1);
         joint_cmd_pub_->data_->data().joints_data().resize(dof_num_);
@@ -159,14 +163,24 @@ public:
     virtual VecXf GetJointTorque() {
         return joint_tau_;
     }
+    virtual Vec3f GetImuBodyRpy() {
+        return rpy_body_;
+    }
+    virtual Vec3f GetImuBodyAcc() {
+        return acc_body_;
+    }
+    virtual Vec3f GetImuBodyOmega() {
+        std::cout<<"omega_body_"<<omega_body_<<std::endl;
+        return omega_body_;
+    }
     virtual Vec3f GetImuRpy() {
-        return rpy_;
+        return rpy_leg_;
     }
     virtual Vec3f GetImuAcc() {
-        return acc_;
+        return acc_leg_;
     }
     virtual Vec3f GetImuOmega() {
-        return omega_body_;
+        return omega_leg_;
     }
     virtual VecXf GetContactForce() {
         return VecXf::Zero(4);
@@ -192,7 +206,10 @@ public:
         return driver_temperture_;
     }
     virtual double GetImuTimestamp(){
-        return imu_ts_;
+        return imu_leg_ts_;
+    }
+    virtual double GetImuBodyTimestamp(){
+        return imu_body_ts_;
     }
     virtual std::vector<uint16_t> GetBatteryData(){
         return battery_data_;
@@ -217,22 +234,34 @@ public:
             driver_status_[i] = data->data().joints_data().at(i).status_word();
             joint_data_id_[i] = uint16_t(run_cnt_);
         }
-        // std::cout<<"pp:"<< data->data().joints_data().at(7).position()<<std::endl;
-        // std::cout<<"qq:"<<joint_pos_.transpose()<<std::endl;
+        // std::cout<<"joint upload pos:"<< data->data().joints_data().at(5).position()<<std::endl;
+        // std::cout<<"pos_offset_:"<<pos_offset_[5]<<std::endl;
+        // std::cout<<"final jonit pos:"<<joint_pos_(5)<<std::endl;
         ri_ts_ = GetTimestampMs()/1000.;
     }
 
-    void HandlerIMU(const drdds::msg::ImuData* data) {
-        rpy_ = Vec3f(Deg2Rad(data->data().roll()), Deg2Rad(data->data().pitch()), Deg2Rad(data->data().yaw()));
-        acc_ << data->data().acc_x(), data->data().acc_y(), data->data().acc_z();
-        omega_body_ << data->data().omega_x(), data->data().omega_y(), data->data().omega_z();
-        imu_ts_ = GetTimestampMs();
+    void HandlerIMULeg(const drdds::msg::ImuData* data) {
+        rpy_leg_ = Vec3f(Deg2Rad(data->data().roll()), Deg2Rad(data->data().pitch()), Deg2Rad(data->data().yaw()));
+        acc_leg_ << data->data().acc_x(), data->data().acc_y(), data->data().acc_z();
+        omega_leg_ << data->data().omega_x(), data->data().omega_y(), data->data().omega_z();
+        imu_leg_ts_ = GetTimestampMs();
     }
 
-    // void HandlerHealth(const drdds::msg::ExeHealth* data) {
-    //     // 电量
-    //     battery_data_[0] = uint8_t(data->data().battery_info().at(0).battery_level());
-    // }
+    void HandlerIMUBody(const drdds::msg::ImuData* data) {
+        rpy_body_ = Vec3f(Deg2Rad(data->data().roll()), Deg2Rad(data->data().pitch()), Deg2Rad(data->data().yaw()));
+        acc_body_ << data->data().acc_x(), data->data().acc_y(), data->data().acc_z();
+        omega_body_ << data->data().omega_x(), data->data().omega_y(), data->data().omega_z();
+        imu_body_ts_ = GetTimestampMs();
+        // std::cout<<"acc_body_:"<<acc_body_.transpose()<<std::endl;
+    }
+
+    void HandlerHealth(const drdds::msg::ExeHealth* data) {
+        battery_data_[0] = uint8_t(data->data().battery_info().at(1).battery_level());        // 电量
+        battery_data_[1] = uint16_t(data->data().battery_info().at(1).voltage());            //电压 
+        battery_data_[2] = uint16_t(data->data().battery_info().at(1).current());            //电流//现在电池上报有点问题 只有正值
+        battery_data_[3] = uint16_t(data->data().battery_info().at(1).protected_state()); //故障报警
+        // std::cout<<"battery_data:"<<battery_data_[0]<<", "<<battery_data_[1]<<", "<<battery_data_[2]<<", "<<battery_data_[3]<<", "<<std::endl;
+    }
 };
 
 

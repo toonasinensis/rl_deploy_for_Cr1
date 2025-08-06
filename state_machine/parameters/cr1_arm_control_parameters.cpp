@@ -1,7 +1,7 @@
 #include "control_parameters.h"
 
 void ControlParameters::GenerateCR1ARMParameters(){
-    dof_num = 14;
+    dof_num_ = 14;
 
     arm_joint_lower_ = VecXf::Zero(7);
     arm_joint_upper_ = VecXf::Zero(7);

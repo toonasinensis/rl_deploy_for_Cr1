@@ -29,25 +29,84 @@
 // 26 right_knee_joint
 // 27 right_ankle_y_joint
 // 28 right_ankle_x_joint
-void ControlParameters::GenerateCR1BParameters(){//b样机只有臂，腰，腿，手腕
-    dof_num = 29;
+/*
+waist_z_joint             (-3.6652, 1.7453)      107
+waist_x_joint             (-0.7854, 0.7854)      107
+waist_y_joint             (-0.5236, 1.5708)      413
+left_shoulder_y_joint     (-3.3161, 1.5708)      107
+left_shoulder_x_joint     (-0.43633, 3.5779)      107
+left_shoulder_z_joint     (-2.9671, 2.9671)      107
+left_elbow_joint          (-0.767945, 1.74533)      107
+left_wrist_z_joint        (-2.9671, 2.9671)      31
+left_wrist_y_joint        (-1.5708, 1.5708)      31
+left_wrist_x_joint        (-1.5708, 1.5708)      31
+right_shoulder_y_joint    (-3.3161, 1.5708)      107
+right_shoulder_x_joint    (-3.5779, 0.43633)      107
+right_shoulder_z_joint    (-2.9671, 2.9671)      107
+right_elbow_joint         (-0.767945, 1.74533)      107
+right_wrist_z_joint       (-2.9671, 2.9671)      31
+right_wrist_y_joint       (-1.5708, 1.5708)      31
+right_wrist_x_joint       (-1.5708, 1.5708)      31
+left_hip_y_joint          (-2.7925, 1.5708)      413
+left_hip_x_joint          (-0.43633, 2.618)      107
+left_hip_z_joint          (-0.5236, 3.6652)      107
+left_knee_joint           (-0.17453, 2.5307)      413
+left_ankle_y_joint        (-1.0472, 0.7854)      107
+left_ankle_x_joint        (-0.61087, 0.61087)      31
+right_hip_y_joint         (-2.7925, 1.5708)      413
+right_hip_x_joint         (-2.618, 0.43633)      107
+right_hip_z_joint         (-3.6652, 0.5236)      107
+right_knee_joint          (-0.17453, 2.5307)      413
+right_ankle_y_joint       (-1.0472, 0.7854)      107
+right_ankle_x_joint       (-0.61087, 0.61087)      31
 
-    arm_joint_lower_ = VecXf::Zero(7);
-    arm_joint_upper_ = VecXf::Zero(7);
-    joint_vel_limit_ = VecXf::Zero(7);
-    torque_limit_ = VecXf::Zero(7);
-    arm_kp = VecXf::Zero(7);
-    arm_kd = VecXf::Zero(7);
-    waist_kp = VecXf::Zero(3);
-    waist_kd = VecXf::Zero(3);
-    arm_link_len_ = VecXf::Zero(6);
-    waist_joint_upper_ = VecXf::Zero(3);
-    waist_joint_lower_ = VecXf::Zero(3);
-    joint_kp = VecXf::Zero(29);
-    joint_kd = VecXf::Zero(29);
-    default_joint_pos = VecXf(29);
+###
+*/
+void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，腿，手腕
+    dof_num_ = 31;
+    waist_dof_num_ = 3;
+    arm_dof_num_ = 7;
+    leg_dof_num_ = 6;
+    neck_dof_num_ = 2;
+
+    //alloacte memeory
+    waist_kp = VecXf::Zero(waist_dof_num_);
+    waist_kd = VecXf::Zero(waist_dof_num_);
+    arm_kp = VecXf::Zero(arm_dof_num_);
+    arm_kd = VecXf::Zero(arm_dof_num_);
+    neck_kp =  VecXf::Zero(neck_dof_num_);
+    neck_kd =  VecXf::Zero(neck_dof_num_);
+
+    leg_kd = VecXf::Zero(leg_dof_num_);
+    leg_kp = VecXf::Zero(leg_dof_num_);
+
+    joint_kp = VecXf::Zero(dof_num_);
+    joint_kd = VecXf::Zero(dof_num_);
+    
+    waist_joint_lower_ = VecXf::Zero(waist_dof_num_);
+    waist_joint_upper_ = VecXf::Zero(waist_dof_num_);
+    arm_joint_lower_ = VecXf::Zero(arm_dof_num_);
+    arm_joint_upper_ = VecXf::Zero(arm_dof_num_);
+
+    leg_joint_upper_ = VecXf::Zero(leg_dof_num_);
+    leg_joint_lower_ = VecXf::Zero(leg_dof_num_);
+
+    neck_joint_upper_ = VecXf::Zero(neck_dof_num_);
+    neck_joint_lower_ = VecXf::Zero(neck_dof_num_);
+
+    
+
+    joint_vel_limit_ = VecXf::Zero(dof_num_);
+    torque_limit_ = VecXf::Zero(dof_num_);
 
 
+
+    
+    
+
+    default_joint_pos = VecXf(dof_num_);
+
+    //this is for rl,but the squence is robot
     // HIP_Y
     default_joint_pos(17) = -0.20;
     default_joint_pos(23) = -0.20;
@@ -70,119 +129,64 @@ void ControlParameters::GenerateCR1BParameters(){//b样机只有臂，腰，腿�
     default_joint_pos(11) = -0.18; // right_shoulder_x
     default_joint_pos(10) = 0.35;  // right_shoulder_y
 
+ 
 
-    arm_joint_lower_ << -1.5706, -3.3158, -2.8621, -1.8325, -2.8621, -1.6579, -1.6579;
-    arm_joint_upper_ << 3.3158, 0.4363, 2.8621, 2.1815, 2.8621, 1.6579, 1.6579;
-    //---待核对---//
-    joint_vel_limit_ << 20., 20., 20., 20., 20., 20., 20.;//待核对
-    torque_limit_ << 80., 80., 80., 80., 30., 30., 30.;
-
-    //---待核对---//
-    arm_kp << 80., 80., 80., 60., 200., 200., 200.;
-    arm_kd << 2., 2., 2., 1.5, 5.,5., 5.;
-    arm_link_len_ << 0.10135, 0.1486 , 0.1164, 0.099, 0.052, 0.082;
-    hand_link_len_ = 0.15;
-
-    joint_vel_limit_ = VecXf::Zero(6);
-    torque_limit_ = VecXf::Zero(6);
-    
-    leg_joint_lower_ << -2.793, -0.4363, -0.5236, -2.5307, -0.7854, -0.6109;
-    leg_joint_upper_ << 2.793, 2.618, 3.6652, 0.1745, 1.0472, 0.6109;
-
-   //  z   <limit lower="-3.6652" upper="1.7453" effort="107" velocity="19.38"/>
-   //  x   <limit lower="-0.7854" upper="0.7854" effort="107" velocity="19.38"/>
-   //  y   <limit lower="-0.5236" upper="1.5708" effort="413" velocity="20"/>
-
+    //upper and lower
     waist_joint_lower_ << -3.6652, -0.7854, -0.5236;
-    waist_joint_upper_ << 1.7453, 0.7854,  1.5708;
+    waist_joint_upper_ << 1.7453, 0.7854, 1.5708;
+
+    arm_joint_lower_ << -3.3161, -0.43633, -2.9671, -0.767945, -2.9671, -1.5708, -1.5708;//注意左右shoulderx,shoulderz,wristz,wristx需镜像
+    arm_joint_upper_ << 1.5708,  3.5799,   2.9671,  1.74533,   2.9671,  1.5708,  1.5708;
+
+    leg_joint_lower_ << -2.7925, -0.4363, -0.5236, -0.1745, -1.0472, -0.61087;//注意左右hipx,hipz,anklex需镜像
+    leg_joint_upper_ << 1.5708,  2.618,   3.6652,  2.5307,  0.7854,  0.61087;
+
+
+    neck_joint_lower_ << -1., -1.;
+    neck_joint_upper_ << 1., 1.;
+    //limit: 
+
+    joint_vel_limit_ << 19.38, 19.38, 20.,
+                        19.38, 19.38, 19.38, 19.38, 23.76, 23.76, 23.76,
+                        19.38, 19.38, 19.38, 19.38, 23.76, 23.76, 23.76,
+                        20., 19.38, 19.38, 20., 19.38, 23.76, 
+                        20., 19.38, 19.38, 20., 19.38, 23.76, 
+                        5., 5.;
+
+    torque_limit_ <<    107., 107., 413.,
+                        107., 107., 107., 107., 31., 31., 31.,
+                        107., 107., 107., 107., 31., 31., 31.,
+                        413., 107., 107., 413., 107., 31., 
+                        413., 107., 107., 413., 107., 31.,
+                        5., 5.;
+
+
+    //pd参数:
+     
     waist_kp <<120,120,120;
     waist_kd << 3,3,3;
-    joint_vel_limit_ << 20., 20., 20., 20., 20., 20.;
-    torque_limit_ << 413., 107., 107., 413., 107., 31.;
 
-    leg_kp << 150., 150., 100., 150., 30., 30.;
-    leg_kd << 3.75, 3.75, 2.5, 3.75, 2.5, 1. ;
-    leg_link_len_ << 0.0483, 0.1635 , 0.2565, 0.410, 0.04665, 0.0; //最后一段待测
+    arm_kp << 80., 80., 80., 60., 90., 90., 90.;
+    arm_kd << 2., 2., 2., 1.5, 2,2.,2;
+   
 
-    // leg_kp = leg_kp *1.5;
     leg_kp << 150., 150., 100., 150., 100., 30.;
+    leg_kd << 3.75, 3.75, 2.5, 3.75, 2.5, 1. ;
 
-    joint_kp << waist_kp, arm_kp, arm_kp, leg_kp, leg_kp;
-    joint_kd << waist_kd, arm_kd, arm_kd, leg_kd, leg_kd; 
-        
-    // joint_kp = joint_kp*1.5;
+    neck_kp  <<0.,0.;
+    neck_kd  <<0.,0.;
+    std::cout << "joint_kp:\n" << joint_kp.transpose() << std::endl;
+    std::cout << "waist_kd:\n" << waist_kd.transpose() << std::endl;
+    std::cout << "arm_kp:\n" << arm_kp.transpose() << std::endl;
+    std::cout << "leg_kp:\n" << leg_kp.transpose() << std::endl;
+    std::cout << "neck_kp:\n" << neck_kp.transpose() << std::endl;
+ 
+
+    joint_kp << waist_kp, arm_kp, arm_kp,leg_kp, leg_kp, neck_kp;
+    joint_kd << waist_kd, arm_kd, arm_kd,leg_kd, leg_kd, neck_kd; 
 
     common_policy_path_ = GetAbsPath()+"/../policy/tmppolicy.onnx";
 
 }
 
-
-// void ControlParameters::GenerateCR1BParametersFromURDF(const std::string& urdf_file) {
-//     // 1. 解析URDF文件
-//     ParseURDF(urdf_file);
-    
-//     // 2. 初始化其他参数（保持原有逻辑）
-//     hand_link_len_ = 0.15;
-//     // ... 其他固定参数设置
-// }
-
-// void ControlParameters::ParseURDF(const std::string& urdf_file) {
-//     tinyxml2::XMLDocument doc;
-//     if (doc.LoadFile(urdf_file.c_str()) != tinyxml2::XML_SUCCESS) {
-//         throw std::runtime_error("Failed to load URDF file");
-//     }
-
-//     // 清空现有数据
-//     // joint_names.clear();
-//     std::vector<float> lower_limits, upper_limits, vel_limits, effort_limits;
-
-//     // 遍历所有joint标签
-//     tinyxml2::XMLElement* robot = doc.FirstChildElement("robot");
-//     for (tinyxml2::XMLElement* joint = robot->FirstChildElement("joint"); 
-//          joint != nullptr; 
-//          joint = joint->NextSiblingElement("joint")) {
-        
-//         // // 获取joint名称
-//         // const char* name = joint->Attribute("name");
-//         // if (!name) continue;
-//         // joint_names.push_back(name);
-
-//         // 获取limit标签
-//         tinyxml2::XMLElement* limit = joint->FirstChildElement("limit");
-//         if (limit) {
-//             lower_limits.push_back(limit->FloatAttribute("lower"));
-//             upper_limits.push_back(limit->FloatAttribute("upper"));
-//             vel_limits.push_back(limit->FloatAttribute("velocity", 0.0f));  // 默认值0
-//             effort_limits.push_back(limit->FloatAttribute("effort", 0.0f)); // 默认值0
-//         } else {
-//             // 如果没有limit标签，使用默认值
-//             lower_limits.push_back(0.0f);
-//             upper_limits.push_back(0.0f);
-//             vel_limits.push_back(0.0f);
-//             effort_limits.push_back(0.0f);
-//         }
-//     }
-
-//     // 3. 转换为Eigen向量
-//     // dof_num = joint_names.size();
-//     joint_lower_ = Eigen::Map<Eigen::VectorXf>(lower_limits.data(), lower_limits.size());
-//     joint_upper_ = Eigen::Map<Eigen::VectorXf>(upper_limits.data(), upper_limits.size());
-//     joint_vel_limit_ = Eigen::Map<Eigen::VectorXf>(vel_limits.data(), vel_limits.size());
-//     torque_limit_ = Eigen::Map<Eigen::VectorXf>(effort_limits.data(), effort_limits.size());
-
-//     std::cout<<"joint_lower_"<<joint_lower_.transpose()<<std::endl;
-//     // 4. 对特定关节组进行分组（臂、腿、腰等）
-//     // 这里需要根据你的URDF中关节命名规则来实现
-//     // 示例伪代码：
-//     /*
-//     for (size_t i = 0; i < joint_names.size(); ++i) {
-//         if (joint_names[i].find("arm") != std::string::npos) {
-//             // 添加到arm组
-//         } 
-//         else if (joint_names[i].find("leg") != std::string::npos) {
-//             // 添加到leg组
-//         }
-//         // ...
-//     }
-//     */
-// }
+ 

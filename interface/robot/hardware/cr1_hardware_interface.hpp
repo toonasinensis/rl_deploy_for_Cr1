@@ -17,7 +17,7 @@ protected:
             ++cnt;
             this->RefreshRobotData();
             current_joint_pos = this->GetJointPosition();
-            // std::cout<<"pos:"<<current_joint_pos<<std::endl;
+            // std::cout<<"pos:"<<current_joint_pos.transpose()<<std::endl;
             for(int i=0;i<dof_num_;++i){
                 if(!data_updated_[i] && current_joint_pos(i) != last_joint_pos(i)){
                     data_updated_[i] = true;
@@ -31,25 +31,59 @@ protected:
                 std::cout << "joint data update is not finished\n";
             }
         }
-        for(int i=1;i<dof_num_;i+=3){
-            if(current_joint_pos(i) > M_PI / 2.){
-                pos_offset_[i] = pos_offset_[i] - 360.;
-                std::cout << "joint " << i << " offset is changed\n";
-            }
-            if(current_joint_pos(i) < Deg2Rad(-210)){
-                pos_offset_[i] = pos_offset_[i] + 360.;
-                std::cout << "joint " << i << " offset is changed\n";
-            }
-        }
+        // for(int i=1;i<dof_num_;i+=3){
+        //     if(current_joint_pos(i) > Deg2Rad(210)){//肘关节自然垂下为90度，原来的90度作判定容易导致肘关节offset变化导致超限
+        //         pos_offset_[i] = pos_offset_[i] - 360.;
+        //         std::cout << "joint " << i << " offset is changed\n";
+        //     }
+        //     if(current_joint_pos(i) < Deg2Rad(-210)){
+        //         pos_offset_[i] = pos_offset_[i] + 360.;
+        //         std::cout << "joint " << i << " offset is changed\n";
+        //     }
+        // }
     }
 
 public:
-    CR1HardwareInterface(const std::string& robot_name):EcanHardwareInterface(robot_name,12){
-        float init_pos_offset[12] =                             
-                            {-0., 0., -0., -10., -0., -0.,
-                             -0., 0., -0., -10., -0., -0.};
-        float joint_dir[12] = {-1, -1, 1, 1, 1, -1,
-                                1, -1, 1, -1, -1, -1};
+    CR1HardwareInterface(const std::string& robot_name):EcanHardwareInterface(robot_name,31){
+        // float init_pos_offset[12] =                             
+        //                     {-0., 0., -0., -10., -0., -0.,
+        //                      -0., 0., -0., -10., -0., -0.};
+        // float joint_dir[12] = {-1, -1, 1, 1, 1, -1,
+        //                         1, -1, 1, -1, -1, -1};
+        // float init_pos_offset[26] =                             
+        //                     {-0., 0., -0., -10., -0., -0.,
+        //                      -0., 0., -0., -10., -0., -0.,
+        //                      -0., 0., -0., -0., -0., -0., -0.,
+        //                      -0., 0., -0., -0., -0., -0., -0.};
+        // float joint_dir[26] = {-1, -1, 1, 1, 1, -1,
+        //                         1, -1, 1, -1, -1, -1,
+        //                         1, -1, 1, 1, 1, 1, 1,
+        //                         -1, 1, 1, -1, 1, 1, 1};
+        float init_pos_offset[31] = {100., 0., 0.,//腰 wristX Y限位太难标了，标在0，相对准确
+                                    90., -25., 170., -44., 170., -90., -90.,//左手
+                                    90., 25., -170., -44., -170., -90., 90.,//右手
+                                    0*90., -25., -30., -10., 45., 35.,//左腿
+                                    0*90., 25., 30., -10., 45., -35.,//右腿
+                                    0., 0.};//头
+        float joint_dir[31] = { -1, 1, 1,//腰
+                                -1, 1, 1, -1, 1, 1, 1,//左手
+                                1, 1, 1, -1, 1, 1, 1,//右手
+                                1, -1, 1, -1, -1, -1,//左腿
+                                -1, 1, 1, -1, -1, -1,//右腿
+                                1, 1//头
+                                };
+        // float init_pos_offset[21] = {100.,//腰 wristX Y限位太难标了，标在0，相对准确
+        //                             90., -25., 170., -44.,//左手
+        //                             90., 25., -170., -44.,//右手
+        //                             0*90., -25., -30., -10., 45., 35.,//左腿
+        //                             0*90., 25., 30., -10., 45., -35.//右腿
+        //                            };
+        // float joint_dir[21] = { -1,//腰
+        //                         -1, 1, 1, -1, //左手
+        //                         1, 1, 1, -1, //右手
+        //                         1, -1, 1, -1, -1, -1,//左腿
+        //                         -1, 1, 1, -1, -1, -1,//右腿
+        //                         };
         for(int i=0;i<dof_num_;++i){
             pos_offset_[i] = init_pos_offset[i];
             joint_dir_[i] = joint_dir[i];

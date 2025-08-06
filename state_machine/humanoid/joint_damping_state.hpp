@@ -21,10 +21,11 @@ private:
 public:
     JointDampingState(const RobotName& robot_name, const std::string& state_name, 
         std::shared_ptr<ControllerData> data_ptr):StateBase(robot_name, state_name, data_ptr){
-            VecXf kd_ = VecXf::Zero(cp_ptr_->dof_num);
-            // std::cout<<kd_.size()<<cp_ptr_->waist_kd <<cp_ptr_->leg_kd<<std::endl;
-            kd_<<cp_ptr_->waist_kd ,cp_ptr_->arm_kd,cp_ptr_->arm_kd, cp_ptr_->leg_kd, cp_ptr_->leg_kd;
-            joint_cmd_ = MatXf::Zero(cp_ptr_->dof_num, 5);
+            VecXf kd_ = VecXf::Zero(cp_ptr_->dof_num_);
+            std::cout<<"kd_.size("<<kd_.size()<<"w"<<cp_ptr_->waist_kd.size() <<"arm "<<cp_ptr_->arm_kd.size()<<cp_ptr_->leg_kd.size()\
+            <<" cp_ptr_->neck_kd;"<< cp_ptr_->neck_kd.size()<<std::endl;
+            kd_<<cp_ptr_->waist_kd ,cp_ptr_->arm_kd,cp_ptr_->arm_kd, cp_ptr_->leg_kd, cp_ptr_->leg_kd, cp_ptr_->neck_kd;
+            joint_cmd_ = MatXf::Zero(cp_ptr_->dof_num_, 5);
             joint_cmd_.col(2) = kd_;
         }
     ~JointDampingState(){}

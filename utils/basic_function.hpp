@@ -32,7 +32,7 @@ inline float LimitNumber(float data, float limit){
 
 inline float LimitNumber(float data, float low, float high){
     if(low > high){
-        std::cerr << "error limit range" << std::endl;
+        std::cerr << "error limit range" <<"low"<<low<<"high"<<high<< std::endl;
         return data;
     }
     if(data > high) return high;

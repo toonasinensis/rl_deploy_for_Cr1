@@ -27,7 +27,7 @@
 #include "hardware/cr1pro_wbc_hardware_interface.hpp"
 #include "data_streaming.hpp"
 #include "safe_controller.hpp"
-
+#define SIMULATION_MODE
 namespace humanoid{
 class HumanoidStateMachine : public StateMachineBase{
 private:
@@ -76,13 +76,14 @@ public:
             cp_ptr_ = std::make_shared<ControlParameters>(robot_name_);
 
         }
-        else if(robot_name_ == RobotName::CR1B){
+        else if(robot_name_ == RobotName::CR1Pro){
             #ifdef  SIMULATION_MODE
-                ri_ptr_ = std::make_shared<CR1_PRO_WBC_SimInterface>("CR1B",29);        
                 cp_ptr_ = std::make_shared<ControlParameters>(robot_name_);
+                ri_ptr_ = std::make_shared<CR1_PRO_WBC_SimInterface>("CR1B",cp_ptr_->dof_num_);        
+
    
             #else
-                ri_ptr_ = std::make_shared<CR1_PRO_WBC_HardwareInterface>(robot_name_);        
+                ri_ptr_ = std::make_shared<CR1_PRO_WBC_HardwareInterface>("CR1PRO");        
                 cp_ptr_ = std::make_shared<ControlParameters>(robot_name_);
    
             #endif

@@ -69,13 +69,13 @@ public:
     virtual void Run() {
         GetRobotJointValue();   
         // std::cout<<current_joint_pos_.transpose()<<std::endl;     
-        VecXf planning_joint_pos = VecXf::Zero(cp_ptr_->dof_num);
-        VecXf planning_joint_vel = VecXf::Zero(cp_ptr_->dof_num);
-        VecXf planning_joint_tau = VecXf::Zero(cp_ptr_->dof_num);
-        VecXf kp_ = VecXf::Zero(cp_ptr_->dof_num);
-        VecXf kd_ = VecXf::Zero(cp_ptr_->dof_num);
-        joint_cmd_ = MatXf::Zero(cp_ptr_->dof_num, 5);
-        goal_joint_pos_ = VecXf::Zero(cp_ptr_->dof_num);
+        VecXf planning_joint_pos = VecXf::Zero(cp_ptr_->dof_num_);
+        VecXf planning_joint_vel = VecXf::Zero(cp_ptr_->dof_num_);
+        VecXf planning_joint_tau = VecXf::Zero(cp_ptr_->dof_num_);
+        VecXf kp_ = VecXf::Zero(cp_ptr_->dof_num_);
+        VecXf kd_ = VecXf::Zero(cp_ptr_->dof_num_);
+        joint_cmd_ = MatXf::Zero(cp_ptr_->dof_num_, 5);
+        goal_joint_pos_ = VecXf::Zero(cp_ptr_->dof_num_);
 
         //-------------------关节测试-----------------//
         float init_time = 3.;
@@ -92,8 +92,8 @@ public:
         }
         //-------------------关节测试-----------------//
         
-        kp_<<cp_ptr_->waist_kp,cp_ptr_->arm_kp,cp_ptr_->arm_kp,cp_ptr_->leg_kp,cp_ptr_->leg_kp;
-        kd_<<cp_ptr_->waist_kp,cp_ptr_->arm_kp,cp_ptr_->arm_kp,cp_ptr_->leg_kd,cp_ptr_->leg_kd; 
+        kp_<<cp_ptr_->waist_kp,cp_ptr_->arm_kp,cp_ptr_->arm_kp,cp_ptr_->leg_kp,cp_ptr_->leg_kp, cp_ptr_->neck_kp;
+        kd_<<cp_ptr_->waist_kp,cp_ptr_->arm_kp,cp_ptr_->arm_kp,cp_ptr_->leg_kd,cp_ptr_->leg_kd, cp_ptr_->neck_kp; 
         
         // std::cout<<"---------info-----------"<<std::endl;
         // std::cout<<kp_.transpose()<<std::endl;

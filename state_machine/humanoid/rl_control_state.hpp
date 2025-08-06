@@ -52,22 +52,46 @@ private:
  
                 auto ra = policy_ptr_->GetRobotAction(rbs_, *(uc_ptr_->GetUserCommand()));
 
-                // VecXf joint_pos_lower(cp_ptr_->dof_num), joint_pos_upper(cp_ptr_->dof_num);
-                // joint_pos_lower << cp_ptr_->leg_joint_lower_, cp_ptr_->leg_joint_lower_;
-                // joint_pos_upper << cp_ptr_->leg_joint_upper_, cp_ptr_->leg_joint_upper_;
-                // joint_pos_lower(7) = -cp_ptr_->leg_joint_upper_(1);
-                // joint_pos_upper(7) = -cp_ptr_->leg_joint_lower_(1);
-                // joint_pos_lower(8) = -cp_ptr_->leg_joint_upper_(2);
-                // joint_pos_upper(8) = -cp_ptr_->leg_joint_lower_(2);
-                // joint_pos_lower(11) = -cp_ptr_->leg_joint_upper_(5);
-                // joint_pos_upper(11) = -cp_ptr_->leg_joint_lower_(5);
+                VecXf joint_pos_lower(cp_ptr_->dof_num_), joint_pos_upper(cp_ptr_->dof_num_);
+                auto left_arm_joint_lower = cp_ptr_->arm_joint_lower_;
+                auto right_arm_joint_lower = cp_ptr_->arm_joint_lower_;//这合理吗??????????
 
+                auto left_arm_joint_upper = cp_ptr_->arm_joint_upper_;
+                auto right_arm_joint_upper = cp_ptr_->arm_joint_upper_;//这合理吗??????????
+
+                right_arm_joint_lower(1) = -cp_ptr_->arm_joint_upper_(1);//1right_shoulder_x_joint
+                right_arm_joint_upper(1) = -cp_ptr_->arm_joint_lower_(1);//1right_shoulder_x_joint镜像
+
+         
+                auto left_leg_joint_upper = cp_ptr_->leg_joint_upper_;
+                auto right_leg_joint_upper = cp_ptr_->leg_joint_upper_;//这合理吗??????????
+
+                auto left_leg_joint_lower = cp_ptr_->leg_joint_lower_;
+                auto right_leg_joint_lower = cp_ptr_->leg_joint_lower_;//这合理吗??????????
+
+                right_leg_joint_lower(1) =- cp_ptr_->leg_joint_upper_(1);//1right_hip_x_joint
+                right_leg_joint_upper(1) = -cp_ptr_->leg_joint_lower_(1);//5right_ankle_x_joint镜像
+
+                right_leg_joint_lower(2) =- cp_ptr_->leg_joint_upper_(2);//2right_hip_z_joint
+                right_leg_joint_upper(2) = -cp_ptr_->leg_joint_lower_(2);//5right_ankle_x_joint镜像
+
+                right_leg_joint_lower(5) = -cp_ptr_->leg_joint_upper_(5);//5right_ankle_x_joint镜像
+                right_leg_joint_upper(5) = -cp_ptr_->leg_joint_lower_(5);//5right_ankle_x_joint镜像
+
+
+                joint_pos_lower <<cp_ptr_->waist_joint_lower_,left_arm_joint_lower,right_arm_joint_lower,  \
+                left_leg_joint_lower,left_leg_joint_lower,cp_ptr_->neck_joint_lower_;
+
+                joint_pos_upper <<cp_ptr_->waist_joint_upper_,left_arm_joint_upper,right_arm_joint_upper,  \
+                left_leg_joint_upper,left_leg_joint_upper,cp_ptr_->neck_joint_upper_;
+                 
                 //限幅是为了安全起见，实际策略执行时可以去掉
-                // for(int i=0;i<12;++i){
-                //     ra.goal_joint_pos(i) =ra.goal_joint_pos(i);// LimitNumber(ra.goal_joint_pos(i), joint_pos_lower(i), joint_pos_upper(i));
-                // }
-                
+                for(int i=0;i<12;++i){
+                    ra.goal_joint_pos(i) = LimitNumber(ra.goal_joint_pos(i), joint_pos_lower(i), joint_pos_upper(i));
+                }
+
                 MatXf res = ra.ConvertToMat();
+                
                 ri_ptr_->SetJointCommand(res);
                 run_cnt_record = state_run_cnt_;
                 clock_gettime(CLOCK_MONOTONIC,&end_timestamp);
