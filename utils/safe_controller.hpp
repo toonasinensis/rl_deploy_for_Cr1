@@ -169,7 +169,7 @@ private:
                 // std::cout << "rpy: "<< (ri_ptr_->GetImuRpy()).transpose() <<std::endl;
             }
             if(joint_data_same_cnt_[i]>30){
-                // std::cerr << "joint " << i << " data is not update" << std::endl;
+                std::cerr << "joint " << i << " data is not update" << std::endl;
                 robot_error_state_.joint_num_error = 1;
                 joint_update_state_ |= (1 << i);
                 res = false;

@@ -165,6 +165,21 @@ public:
      * @brief human waist joint kd
      */
     VecXf waist_kd;
+    /**
+ * @brief human waist joint kp
+ */
+    //this is for pos ctrl esplically when init from default
+    VecXf waist_kp_pc;
+    VecXf waist_kd_pc;
+
+    VecXf arm_kp_pc;
+    VecXf arm_kd_pc;
+
+    VecXf leg_kp_pc;
+    VecXf leg_kd_pc;
+
+    VecXf neck_kp_pc;
+    VecXf neck_kd_pc;
 
     // joint_names
     /**

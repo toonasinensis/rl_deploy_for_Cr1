@@ -80,9 +80,22 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     leg_kd = VecXf::Zero(leg_dof_num_);
     leg_kp = VecXf::Zero(leg_dof_num_);
 
+      waist_kp_pc =  VecXf::Zero(waist_dof_num_);
+      waist_kd_pc =  VecXf::Zero(waist_dof_num_);
+
+      arm_kp_pc = VecXf::Zero(arm_dof_num_);
+      arm_kd_pc = VecXf::Zero(arm_dof_num_);
+
+      leg_kp_pc = VecXf::Zero(leg_dof_num_);
+      leg_kd_pc =  VecXf::Zero(leg_dof_num_);
+
+      neck_kp_pc = VecXf::Zero(neck_dof_num_);
+      neck_kd_pc = VecXf::Zero(neck_dof_num_);
+
+
     joint_kp = VecXf::Zero(dof_num_);
     joint_kd = VecXf::Zero(dof_num_);
-    
+
     waist_joint_lower_ = VecXf::Zero(waist_dof_num_);
     waist_joint_upper_ = VecXf::Zero(waist_dof_num_);
     arm_joint_lower_ = VecXf::Zero(arm_dof_num_);
@@ -126,7 +139,7 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     // SHOULDER_X / Y
     default_joint_pos(4) = 0.18;   // left_shoulder_x
     default_joint_pos(3) = 0.35;   // left_shoulder_y
-    default_joint_pos(11) = -0.18; // right_shoulder_x
+    default_joint_pos(11) = -0.18; // right_shoulder_x                  
     default_joint_pos(10) = 0.35;  // right_shoulder_y
 
  
@@ -180,10 +193,27 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     std::cout << "arm_kp:\n" << arm_kp.transpose() << std::endl;
     std::cout << "leg_kp:\n" << leg_kp.transpose() << std::endl;
     std::cout << "neck_kp:\n" << neck_kp.transpose() << std::endl;
- 
+    
+
+    //this is for 恢复0位
+
+    waist_kp_pc << 600., 600., 1800.;
+    waist_kd_pc << 6., 6., 12.;
+
+
+    arm_kp_pc << 600., 600., 600., 600., 90., 90., 90.;
+    arm_kd_pc << 6., 6., 6., 6., 2., 2., 2.;
+
+    leg_kp_pc << 1800.0, 600.0, 600.0, 1800.0, 600.0, 90.0;
+    leg_kd_pc << 24.0, 6.0, 6.0, 24.0, 6.0, 2.0;
+
+
+    neck_kp_pc << 0., 0.;
+    neck_kd_pc << 0., 0.;
 
     joint_kp << waist_kp, arm_kp, arm_kp,leg_kp, leg_kp, neck_kp;
     joint_kd << waist_kd, arm_kd, arm_kd,leg_kd, leg_kd, neck_kd; 
+    // joint_kp = joint_kp*0.1;
 
     common_policy_path_ = GetAbsPath()+"/../policy/tmppolicy.onnx";
 

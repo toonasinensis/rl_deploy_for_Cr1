@@ -14,8 +14,8 @@
 # set passwd "'"
 
 # set ip "172.16.14.80"
-set ip "192.168.1.131"
-set username "ysc"
+set ip "10.21.41.1"
+set username "user"
 set passwd "'"
 
 set send_policy "0"
@@ -54,7 +54,7 @@ if { "$send_policy" == "1" } {
 
 # /usr/bin/expect<<EOF
 
-spawn scp build/rl_deploy  $username@$ip:/home/$username/dros/rl_deploy/bin/rl_deploy
+spawn scp build/rl_deploy  $username@$ip:/home/$username/rl_deploy/bin/rl_deploy
 expect {
   "密码："
         {

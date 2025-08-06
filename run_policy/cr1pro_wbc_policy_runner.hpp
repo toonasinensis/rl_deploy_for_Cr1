@@ -31,8 +31,7 @@ private:
     // ShmFloatReader des_cp_r("/shm_cp", 22*3);  // float 数量为 12
     // ShmFloatReader des_z_r("/shm_z", 1);  // float 数量为 12
 
-     std::unique_ptr<ShmFloatReader> des_joint_read;
-    // std::unique_ptr<ShmFloatReader> des_rot_r;
+     // std::unique_ptr<ShmFloatReader> des_rot_r;
     // std::unique_ptr<ShmFloatReader> des_cp_r;
     // std::unique_ptr<ShmFloatReader> des_z_r;
     // std::vector<c10::IValue> obs_vector_{};
@@ -178,7 +177,7 @@ public:
     robot2policy_idx = generate_permutation(robot_order, policy_order);
     policyandpd2robot_idx = generate_permutation(policy_and_pd_order, robot_order);
 
-    if (!loader.load("config/data_output.json")) {
+    if (!loader.load("../config/data_output.json")) {
             std::cerr<<"no data file"<<std::endl;
      }
      else{
@@ -346,7 +345,7 @@ public:
 
         ra.goal_joint_vel.setZero();
         auto next_time = std::chrono::high_resolution_clock::now();
-        ra.tau_ff(0) = 999;
+        // ra.tau_ff(0) = 999;
         auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(next_time - this_time).count();
             std::cout << std::fixed << std::setprecision(4)\
               << "infer Elapsed: " << duration2 << " us" << std::endl;

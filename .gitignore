@@ -39,7 +39,5 @@
 
 # debug information files
 *.dwo
-"third_party/gamepad/"
 "build/"
-third_party/gamepad/
 build/

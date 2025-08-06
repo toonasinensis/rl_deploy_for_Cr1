@@ -21,44 +21,66 @@ private:
     bool first_enter_flag_ = true;
     int cnt=0;
     VecXf joint_pos_, joint_vel_, joint_tau_;
-    Vec3f rpy_, acc_, omg_;
+    Vec3f rpy_body_, acc_body_, omg_body_;
+    Vec3f rpy_leg_, acc_leg_, omg_leg_;
     float enter_state_time_ = 10000.;
 
     void GetProprioceptiveData(){
         joint_pos_ = ri_ptr_->GetJointPosition();
         joint_vel_ = ri_ptr_->GetJointVelocity();
         joint_tau_ = ri_ptr_->GetJointTorque();
-        rpy_ = ri_ptr_->GetImuRpy();
-        acc_ = ri_ptr_->GetImuAcc();
-        omg_ = ri_ptr_->GetImuOmega();
+        rpy_leg_ = ri_ptr_->GetImuRpy();
+        acc_leg_ = ri_ptr_->GetImuAcc();
+        omg_leg_ = ri_ptr_->GetImuOmega();
+       // rpy_body_ = ri_ptr_->GetImuBodyRpy();
+       // acc_body_ = ri_ptr_->GetImuBodyAcc();
+       // omg_body_ = ri_ptr_->GetImuBodyOmega();
     }
 
-    bool JointDataNormalCheck(){//TODO: temeropal unuse the check
-    return true;
+    bool JointDataNormalCheck(){
         VecXf joint_pos_lower(cp_ptr_->dof_num_), joint_pos_upper(cp_ptr_->dof_num_);
-        joint_pos_lower <<cp_ptr_->waist_joint_lower_;
-        joint_pos_upper << cp_ptr_->waist_joint_upper_;
-        joint_pos_lower << cp_ptr_->leg_joint_lower_, cp_ptr_->leg_joint_lower_;
-        joint_pos_upper << cp_ptr_->leg_joint_upper_, cp_ptr_->leg_joint_upper_;
-        
-        joint_pos_lower(7) = -cp_ptr_->leg_joint_upper_(1);
-        joint_pos_upper(7) = -cp_ptr_->leg_joint_lower_(1);
-        joint_pos_lower(8) = -cp_ptr_->leg_joint_upper_(2);
-        joint_pos_upper(8) = -cp_ptr_->leg_joint_lower_(2);
-        joint_pos_lower(11) = -cp_ptr_->leg_joint_upper_(5);
-        joint_pos_upper(11) = -cp_ptr_->leg_joint_lower_(5);
+        if(cp_ptr_->dof_num_ == 31) {
+            joint_pos_lower << cp_ptr_->waist_joint_lower_, cp_ptr_->arm_joint_lower_, cp_ptr_->arm_joint_lower_, cp_ptr_->leg_joint_lower_, cp_ptr_->leg_joint_lower_, cp_ptr_->neck_joint_lower_;
+            joint_pos_upper << cp_ptr_->waist_joint_upper_, cp_ptr_->arm_joint_upper_, cp_ptr_->arm_joint_upper_, cp_ptr_->leg_joint_upper_, cp_ptr_->leg_joint_upper_, cp_ptr_->neck_joint_upper_;
+            joint_pos_lower(11) = -cp_ptr_->arm_joint_upper_(1);
+            joint_pos_upper(11) = -cp_ptr_->arm_joint_lower_(1);
+            joint_pos_lower(12) = -cp_ptr_->arm_joint_upper_(2);
+            joint_pos_upper(12) = -cp_ptr_->arm_joint_lower_(2);
+            joint_pos_lower(24) = -cp_ptr_->leg_joint_upper_(1);
+            joint_pos_upper(24) = -cp_ptr_->leg_joint_lower_(1);
+            joint_pos_lower(25) = -cp_ptr_->leg_joint_upper_(2);
+            joint_pos_upper(25) = -cp_ptr_->leg_joint_lower_(2);
+        }else if(cp_ptr_->dof_num_ == 21) {
+            joint_pos_lower << cp_ptr_->waist_joint_lower_, cp_ptr_->arm_joint_lower_, cp_ptr_->arm_joint_lower_, cp_ptr_->leg_joint_lower_, cp_ptr_->leg_joint_lower_;
+            joint_pos_upper << cp_ptr_->waist_joint_upper_, cp_ptr_->arm_joint_upper_, cp_ptr_->arm_joint_upper_, cp_ptr_->leg_joint_upper_, cp_ptr_->leg_joint_upper_;
+            joint_pos_lower(6) = -cp_ptr_->arm_joint_upper_(1);
+            joint_pos_upper(6) = -cp_ptr_->arm_joint_lower_(1);
+            joint_pos_lower(7) = -cp_ptr_->arm_joint_upper_(2);
+            joint_pos_upper(7) = -cp_ptr_->arm_joint_lower_(2);
+            joint_pos_lower(16) = -cp_ptr_->leg_joint_upper_(1);
+            joint_pos_upper(16) = -cp_ptr_->leg_joint_lower_(1);
+            joint_pos_lower(17) = -cp_ptr_->leg_joint_upper_(2);
+            joint_pos_upper(17) = -cp_ptr_->leg_joint_lower_(2);
+        }else{
+            joint_pos_lower << cp_ptr_->leg_joint_lower_, cp_ptr_->leg_joint_lower_;
+            joint_pos_upper << cp_ptr_->leg_joint_upper_, cp_ptr_->leg_joint_upper_;
+            joint_pos_lower(7) = -cp_ptr_->leg_joint_upper_(1);
+            joint_pos_upper(7) = -cp_ptr_->leg_joint_lower_(1);
+            joint_pos_lower(8) = -cp_ptr_->leg_joint_upper_(2);
+            joint_pos_upper(8) = -cp_ptr_->leg_joint_lower_(2);
+        }
+
         // std::cout<<"joint_pos_lower:"<<joint_pos_lower.transpose()<<std::endl;
         // std::cout<<"joint_pos_upper:"<<joint_pos_upper.transpose()<<std::endl;
         //---正负待根据实际安装确认---//
-        std::cout<<joint_pos_.size()<<"cp_ptr_->dof_num"<<cp_ptr_->dof_num_<<std::endl;
         for(int i=0;i<cp_ptr_->dof_num_;++i){
             if(std::isnan(joint_pos_lower(i)) || joint_pos_(i) > joint_pos_upper(i)+0.1 || joint_pos_(i) < joint_pos_lower(i)-0.1) {
                 // std::cout << "joint pos " << i << " : " << joint_pos_(i) << " | " 
                 //                                         << joint_pos_lower(i) << " " << joint_pos_upper(i) << std::endl;
-                // std::cout << "joint "<<i<< "is out of range! "<<std::endl<<"upper: "<<joint_pos_upper(i)+0.1<<",lower: " << joint_pos_lower(i)-0.1<<"now:"<<joint_pos_(i)<<std::endl;
+                std::cout << "joint "<<i<< "is out of range! "<<std::endl<<"upper: "<<joint_pos_upper(i)+0.1<<",lower: " << joint_pos_lower(i)-0.1<<",now:"<<joint_pos_(i)<<std::endl;
                 return false;
             }
-            if(std::isnan(joint_vel_(i)) || (joint_vel_(i)) > cp_ptr_->joint_vel_limit_(i%7) + 0.1) {
+            if(std::isnan(joint_vel_(i)) || (joint_vel_(i)) > cp_ptr_->joint_vel_limit_(i) + 0.1) {
                 // std::cout << "joint vel " << i << " : " << joint_vel_(i) << " | " << cp_ptr_->joint_vel_limit_(i%3) << std::endl;
                 return false;
             }
@@ -66,19 +88,18 @@ private:
         return true;
     }
     bool ImuDataNormalCheck(){
-        return true;
         for(int i=0;i<3;++i){
-            if(std::isnan(rpy_(i)) || fabs(rpy_(i)) > M_PI){
-                std::cout << "rpy_ " << i << " : " << rpy_(i) << std::endl;
+            if(std::isnan(rpy_leg_(i)) || fabs(rpy_leg_(i)) > M_PI){
+                // std::cout << "rpy_ " << i << " : " << rpy_(i) << std::endl;
                 return false;
             } 
-            if(std::isnan(omg_(i)) || fabs(omg_(i)) > M_PI){
-                std::cout << "omg_ " << i << " : " << omg_(i) << std::endl;
+            if(std::isnan(omg_leg_(i)) || fabs(omg_leg_(i)) > M_PI){
+                // std::cout << "omg_ " << i << " : " << omg_(i) << std::endl;
                 return false;
             }
         }
-        if(acc_.norm() < 0.1*gravity || acc_.norm() > 3.0*gravity){
-            std::cout << "acc " << " : " << acc_.transpose() << std::endl;
+        if(acc_leg_.norm() < 0.1*gravity || acc_leg_.norm() > 3.0*gravity){
+            // std::cout << "acc " << " : " << acc.transpose() << std::endl;
             return false;
         }
         return true;
@@ -86,13 +107,24 @@ private:
 
     void DisplayProprioceptiveInfo(){
         std::cout << "Joint Data: \n";
-        std::cout << "pos: " << joint_pos_.transpose()*57.3 << std::endl;
+        // std::cout << "pos: " << joint_pos_.transpose()*57.2957795 << std::endl;
+        std::cout << "Waist pos: " << joint_pos_.transpose().segment(0,3)*57.2957795 << std::endl;
+
+        std::cout << "L arm pos: " << joint_pos_.transpose().segment(3,7)*57.2957795 << std::endl;
+        std::cout << "R arm pos: " << joint_pos_.transpose().segment(10,7)*57.2957795 << std::endl;
+
+        std::cout << "L leg pos: " << joint_pos_.transpose().segment(17,6)*57.2957795 << std::endl;
+        std::cout << "R leg pos: " << joint_pos_.transpose().segment(23,6)*57.2957795 << std::endl;
         // std::cout << "vel: " << joint_vel_.transpose() << std::endl;
         // std::cout << "tau: " << joint_tau_.transpose() << std::endl;
-        std::cout << "Imu Data: \n";
-        std::cout << "rpy: " << rpy_.transpose() << std::endl;
-        std::cout << "acc: " << acc_.transpose() << std::endl;
-        std::cout << "omg: " << omg_.transpose() << std::endl;
+        std::cout << "Imu for Leg Data: \n";
+        std::cout << "rpy: " << rpy_leg_.transpose() << std::endl;
+        std::cout << "acc: " << acc_leg_.transpose() << std::endl;
+        std::cout << "omg: " << omg_leg_.transpose() << std::endl;
+        // std::cout << "Imu in Body Data: \n";
+        // std::cout << "rpy: " << rpy_body_.transpose() << std::endl;
+        // std::cout << "acc: " << acc_body_.transpose() << std::endl;
+        // std::cout << "omg: " << omg_body_.transpose() << std::endl;
     }
 
     void DisplayAxisValue(){
@@ -127,12 +159,12 @@ public:
         cnt++;
 
         // if(first_enter_flag_ && ri_ptr_->GetInterfaceTimeStamp() - enter_state_time_ > 2.){//to confirm right state input
-        //     DisplayProprioceptiveInfo();
-        //     DisplayAxisValue();
+            // DisplayProprioceptiveInfo();
+            // DisplayAxisValue();
         // }
         MatXf cmd = MatXf::Zero(cp_ptr_->dof_num_, 5);
         // cmd(6,4)=1.2;
-        if(cnt%4000==0){
+        if(cnt%3000==0){
         DisplayProprioceptiveInfo();
         }
         // std::cout<<"cmd:"<<cmd.transpose()<<std::endl;
@@ -143,17 +175,19 @@ public:
         return false;
     }
     virtual StateName GetNextStateName() {
-        if(!joint_normal_flag_ || !imu_normal_flag_ && false) {
-            std::cout << "joint status: " << joint_normal_flag_ << " | imu status: " << imu_normal_flag_ << std::endl;
-            // std::cout<< "1 is normal, 0 is abnormal!!"<<std::endl;
-            return StateName::kIdle;
-        }
-        // if(uc_ptr_->GetUserCommand()->safe_control_mode!=0){
-        //     std::cout<<"safe control"<<uc_ptr_->GetUserCommand()->safe_control_mode<<std::endl;
+        // if(!joint_normal_flag_ || !imu_normal_flag_) {
+        //     // std::cout << "joint status: " << joint_normal_flag_ << " | imu status: " << imu_normal_flag_ << std::endl;
         //     return StateName::kIdle;
         // }
-        if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::StandingUp))
-            return StateName::kStandUp;
+        if(uc_ptr_->GetUserCommand()->safe_control_mode!=0){
+            std::cout << "safe_control_mode:" << std::dec <<uc_ptr_->GetUserCommand()->safe_control_mode << std::endl;
+            // DisplayProprioceptiveInfo();
+            return StateName::kIdle;
+        }
+        // if(first_enter_flag_ && ri_ptr_->GetInterfaceTimeStamp() - enter_state_time_ < 2.){
+        //     return StateName::kIdle;
+        // }
+        if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::StandingUp)) return StateName::kStandUp;
         return StateName::kIdle;
     }
 };

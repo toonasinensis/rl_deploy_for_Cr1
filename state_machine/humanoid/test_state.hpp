@@ -67,8 +67,7 @@ public:
     virtual void OnExit() {
     }
     virtual void Run() {
-        GetRobotJointValue();   
-        // std::cout<<current_joint_pos_.transpose()<<std::endl;     
+        GetRobotJointValue();        
         VecXf planning_joint_pos = VecXf::Zero(cp_ptr_->dof_num_);
         VecXf planning_joint_vel = VecXf::Zero(cp_ptr_->dof_num_);
         VecXf planning_joint_tau = VecXf::Zero(cp_ptr_->dof_num_);
@@ -91,10 +90,16 @@ public:
             for(int i=0;i<current_joint_pos_.rows();++i){planning_joint_pos(i) = goal_joint_pos_(i); planning_joint_vel.setZero();}
         }
         //-------------------关节测试-----------------//
-        
-        kp_<<cp_ptr_->waist_kp,cp_ptr_->arm_kp,cp_ptr_->arm_kp,cp_ptr_->leg_kp,cp_ptr_->leg_kp, cp_ptr_->neck_kp;
-        kd_<<cp_ptr_->waist_kp,cp_ptr_->arm_kp,cp_ptr_->arm_kp,cp_ptr_->leg_kd,cp_ptr_->leg_kd, cp_ptr_->neck_kp; 
-        
+        if(cp_ptr_->dof_num_ == 31) {
+            kp_<<cp_ptr_->waist_kp_pc, cp_ptr_->arm_kp_pc, cp_ptr_->arm_kp_pc, cp_ptr_->leg_kp_pc, cp_ptr_->leg_kp_pc, cp_ptr_->neck_kp_pc;
+            kd_<<cp_ptr_->waist_kd_pc, cp_ptr_->arm_kd_pc, cp_ptr_->arm_kd_pc, cp_ptr_->leg_kd_pc, cp_ptr_->leg_kd_pc, cp_ptr_->neck_kd_pc;
+        }else if(cp_ptr_->dof_num_ == 21) {
+            kp_<<cp_ptr_->waist_kp_pc,cp_ptr_->arm_kp_pc,cp_ptr_->arm_kp_pc, cp_ptr_->leg_kp_pc,cp_ptr_->leg_kp_pc;
+            kd_<<cp_ptr_->waist_kd_pc,cp_ptr_->arm_kd_pc,cp_ptr_->arm_kd_pc, cp_ptr_->leg_kd_pc,cp_ptr_->leg_kd_pc;
+        }else{
+            kp_<<cp_ptr_->leg_kp_pc,cp_ptr_->leg_kp_pc;
+            kd_<<cp_ptr_->leg_kd_pc,cp_ptr_->leg_kd_pc;            
+        }
         // std::cout<<"---------info-----------"<<std::endl;
         // std::cout<<kp_.transpose()<<std::endl;
         // std::cout<<kd_.transpose()<<std::endl;
@@ -105,8 +110,8 @@ public:
         joint_cmd_.col(0) = kp_;
         joint_cmd_.col(2) = kd_;  
         joint_cmd_.col(1) = planning_joint_pos;
-        // joint_cmd_.col(3) = planning_joint_vel;
-        // joint_cmd_.col(4) = planning_joint_tau;
+        joint_cmd_.col(3) = planning_joint_vel;
+        joint_cmd_.col(4) = planning_joint_tau;
         ri_ptr_->SetJointCommand(joint_cmd_);
     }
     virtual bool LoseControlJudge() {

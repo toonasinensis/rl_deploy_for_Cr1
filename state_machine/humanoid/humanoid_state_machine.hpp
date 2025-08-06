@@ -27,7 +27,7 @@
 #include "hardware/cr1pro_wbc_hardware_interface.hpp"
 #include "data_streaming.hpp"
 #include "safe_controller.hpp"
-#define SIMULATION_MODE
+// #define SIMULATION_MODE
 namespace humanoid{
 class HumanoidStateMachine : public StateMachineBase{
 private:
@@ -97,7 +97,7 @@ public:
         data_ptr->ri_ptr = ri_ptr_;
         data_ptr->uc_ptr = uc_ptr_;
         data_ptr->cp_ptr = cp_ptr_;
-        ds_ptr_ = std::make_shared<DataStreaming>(true, false);
+        ds_ptr_ = std::make_shared<DataStreaming>(false, false);
         ds_ptr_->SetRobotDataSource(ri_ptr_);
         ds_ptr_->SetUserCommandDataSource(uc_ptr_);
         data_ptr->ds_ptr = ds_ptr_;
