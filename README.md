@@ -13,21 +13,13 @@ make -j4
 
 ```
 
-### 注意事项：
-
-1.CR1上的运动主板是arm架构，如果编译在狗上运行需要安装交叉编译工具
-
-2.运行RL训练出的策略文件需要链接libtorch库，需要根据运行主机的架构和配置自行前往官网(https://pytorch.org/)下载或编译，因为libtorch程序比较大，不在远程仓库中直接添加。如果有需要arm架构基于CPU(CR1运动主机架构)的libtorch库，可以联系xxx获得。
-
-<img src="./doc/libtorch.png" alt="a" style="zoom:75%;" />
-
-
 ## 各模块介绍
 
 ### state_machine
 
 
 ```mermaid
+
 graph LR
 A(Idle) -->B(StandUp/Test) --> C(RL) 
 C-->D(JointDamping)

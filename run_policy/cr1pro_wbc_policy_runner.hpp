@@ -310,7 +310,7 @@ public:
         0.502f, 1.411f, 1.441f;
 
         joint_pos_rl = joint_pos_rl - joint_pos_default;
-        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, my_vec;
+        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, joint_data_now;
 
         // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
         // std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;
@@ -345,7 +345,7 @@ public:
 
         ra.goal_joint_vel.setZero();
         auto next_time = std::chrono::high_resolution_clock::now();
-        // ra.tau_ff(0) = 999;
+        ra.tau_ff(0) = 999;
         auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(next_time - this_time).count();
             // std::cout << std::fixed << std::setprecision(4)\
             //   << "infer Elapsed: " << duration2 << " us" << std::endl;
