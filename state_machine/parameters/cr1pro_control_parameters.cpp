@@ -62,7 +62,37 @@ right_ankle_x_joint       (-0.61087, 0.61087)      31
 
 ###
 */
+#include "json.hpp"
+struct JointPIDGains {
+    std::vector<double> kp;
+    std::vector<double> kd;
+};
+using json = nlohmann::json;
+
+// Load JSON from file
+json load_json(const std::string& filepath) {
+    std::ifstream f(filepath);
+    if (!f.is_open()) {
+        throw std::runtime_error("Could not open file: " + filepath);
+    }
+    return json::parse(f);
+}
+
 void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，腿，手腕
+   
+    json data_json = load_json("../config/config.json");
+
+    auto kp_waist_json = data_json["pid_gains"]["waist"]["kp"].get<std::vector<float>>();
+    auto kp_arm_json = data_json["pid_gains"]["arm"]["kp"].get<std::vector<float>>();
+    auto kp_leg_json = data_json["pid_gains"]["leg"]["kp"].get<std::vector<float>>();
+
+    auto kd_waist_json = data_json["pid_gains"]["waist"]["kd"].get<std::vector<float>>();
+    auto kd_arm_json = data_json["pid_gains"]["arm"]["kd"].get<std::vector<float>>();
+    auto kd_leg_json = data_json["pid_gains"]["leg"]["kd"].get<std::vector<float>>();
+
+
+    // std::cout<<"kp_waist"<<kp_waist<<std::endl;
+   
     dof_num_ = 31;
     waist_dof_num_ = 3;
     arm_dof_num_ = 7;
@@ -188,8 +218,27 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
 
     neck_kp  <<0.,0.;
     neck_kd  <<0.,0.;
+
+    //read from json:
+
+    for (int i=0 ;i<waist_dof_num_;i++)
+    {
+      waist_kp(i) = kp_waist_json.at(i);
+      waist_kd(i) = kd_waist_json.at(i);
+    }
     
-    std::cout << "joint_kp:\n" << joint_kp.transpose() << std::endl;
+    for (int i=0 ;i<arm_dof_num_;i++)
+    {
+      arm_kp(i) = kp_arm_json.at(i);
+      arm_kd(i) = kd_arm_json.at(i);
+    }
+    for (int i=0 ;i<leg_dof_num_;i++)
+    {
+      leg_kp(i) = kp_leg_json.at(i);
+      leg_kd(i) = kd_leg_json.at(i);
+    }
+
+    float kp_scale  = data_json["kp_scale"].get<float>();
     std::cout << "waist_kd:\n" << waist_kd.transpose() << std::endl;
     std::cout << "arm_kp:\n" << arm_kp.transpose() << std::endl;
     std::cout << "leg_kp:\n" << leg_kp.transpose() << std::endl;
@@ -214,7 +263,10 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
 
     joint_kp << waist_kp, arm_kp, arm_kp,leg_kp, leg_kp, neck_kp;
     joint_kd << waist_kd, arm_kd, arm_kd,leg_kd, leg_kd, neck_kd; 
-    // joint_kp = joint_kp*0.1;
+    joint_kp = joint_kp*kp_scale;
+
+    std::cout << "rl's joint_kp:\n" << joint_kp.transpose() << std::endl;
+
 
     common_policy_path_ = GetAbsPath()+"/../policy/tmppolicy.onnx";
 

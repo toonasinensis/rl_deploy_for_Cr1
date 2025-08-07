@@ -183,9 +183,9 @@ public:
      else{
         if (loader.get_key_data("des_joint_pos", joint_data)) {
             std::cout << "Loaded " << joint_data.size() << " entries.\n";
-            for (const auto& vec : joint_data) {
-                std::cout << vec.size() << std::endl;
-            }
+            // for (const auto& vec : joint_data) {
+            //     std::cout << vec.size() << std::endl;
+            // }
         } else {
             std::cerr << "Failed to read key: des_joint_pos\n";
         }

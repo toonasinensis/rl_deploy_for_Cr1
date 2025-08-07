@@ -152,7 +152,7 @@ private:
 
         robot_error_state_.joint_num_error = 0;
         joint_update_state_ = 0;
-        for(int i=0;i<joint_pos.size();++i){
+        for(int i=0;i<joint_pos.size()-2;++i){//去掉啥必脖子
             if(std::isnan(joint_pos(i)) || std::isnan(joint_vel(i)) || std::isnan(joint_tau(i))){
                 robot_error_state_.joint_num_error = 1;
                 res = false;
