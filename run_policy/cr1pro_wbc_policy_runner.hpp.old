@@ -13,11 +13,12 @@
 #define CR1PRO_WBC_POLICY_RUNNER_HPP_
 
 #include "policy_runner_base.hpp"
+#include "ShmReader.hpp"
 
 #include <chrono>
 
 #include "json_loader.hpp"
-// #define SIMULATION_MODE
+
 class CR1PROWBCPolicyRunner : public PolicyRunnerBase
 {
 private:
@@ -77,7 +78,7 @@ private:
     "left_knee_joint", "left_ankle_y_joint", "left_ankle_x_joint",
     "right_hip_y_joint", "right_hip_x_joint", "right_hip_z_joint",
     "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint","neck1","neck2"
-    };
+};
 
     std::vector<std::string> policy_order = {
         "left_hip_y_joint", "right_hip_y_joint", "waist_z_joint",
@@ -96,7 +97,8 @@ private:
         "right_wrist_z_joint", "right_wrist_y_joint", "right_wrist_x_joint","neck1","neck2"
     };
     std::vector<std::string> policy_and_pd_order;// = {'left_hip_y_joint', 'right_hip_y_joint', 'waist_z_joint', 'left_hip_x_joint', 'right_hip_x_joint', 'waist_x_joint', 'left_hip_z_joint', 'right_hip_z_joint', 'waist_y_joint', 'left_knee_joint', 'right_knee_joint', 'left_shoulder_y_joint', 'right_shoulder_y_joint', 'left_ankle_y_joint', 'right_ankle_y_joint', 'left_shoulder_x_joint', 'right_shoulder_x_joint', 'left_ankle_x_joint', 'right_ankle_x_joint', 'left_shoulder_z_joint', 'right_shoulder_z_joint', 'left_elbow_joint', 'right_elbow_joint'};    // B
- 
+    std::vector<float> values;             // values in A
+
     std::vector<int> robot2policy_idx;
     std::vector<int> policyandpd2robot_idx;
 
@@ -111,7 +113,6 @@ private:
 
      int data_cnt=0;
     std::chrono::time_point<std::chrono::high_resolution_clock> last_time ;
-    std::chrono::time_point<std::chrono::high_resolution_clock> state_start_time ;
 
 
 public:
@@ -135,8 +136,8 @@ public:
         // 加载模型
         session_ = Ort::Session(env_, policy_path_.c_str(), session_options_);
 
-        obs_dim_ = 75; // 98;
-        obs_total_dim_ = 375;// 490;
+        obs_dim_ = 98;
+        obs_total_dim_ = 490;
         act_dim_ = 23;
         obs_history_num_ = 5;
         assert(obs_dim_ * obs_history_num_ == obs_total_dim_);
@@ -227,7 +228,6 @@ public:
         run_cnt_ = 0;
         cmd_vel_input_.setZero();
         last_time = std::chrono::high_resolution_clock::now();
-        state_start_time = std::chrono::high_resolution_clock::now();
         data_cnt = 0;
     }
 
@@ -264,9 +264,6 @@ public:
  
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(this_time - last_time).count();
         last_time = this_time;
-        auto phase_time = std::chrono::duration_cast<std::chrono::milliseconds>(this_time - state_start_time).count();
-        auto phase = (float)phase_time / (float) (1022 * 20);
-        Vec4f phase_vec = Vec4f({sin(2 * M_PI * phase), cos(2 * M_PI * phase), sin(4 * M_PI * phase), cos(4 * M_PI * phase)});
 
             std::cout << std::fixed << std::setprecision(3)\
               << "Elapsed: " << duration << " ms" << std::endl;
@@ -313,7 +310,7 @@ public:
         0.502f, 1.411f, 1.441f;
 
         joint_pos_rl = joint_pos_rl - joint_pos_default;
-        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_; //my_vec;
+        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, my_vec;
 
         // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
         // std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;
@@ -330,11 +327,7 @@ public:
         //
         
         action_ = Onnx_infer(obs_buff);
-        if(action_.array().hasNaN()) {
-            std::cout << "action exist NaN" << std::endl;
-            exit(0);
-        }
-
+        
         std::cout<<"action_"<<action_.transpose()<<std::endl;
         VecXf no_rl_joint_action = VecXf::Zero(dof_dim - act_dim_);
         action_all_rl << action_, no_rl_joint_action;//把输出为0的，放在后面

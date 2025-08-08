@@ -96,6 +96,10 @@ namespace types{
         bool flipFlag=false;
         bool jumpFlag=false;
         int target_policy=0;
+        
+        int target_joint = 0;
+        bool finish_calibrate = false;
+        float calibrateJoint=0;
 
         float targetX=0;
         float targetY=0;

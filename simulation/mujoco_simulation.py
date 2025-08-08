@@ -130,8 +130,10 @@ class MuJoCoSimulation:
         ]
 
         self.arr_init_dof = np.array(dof_list, dtype=np.float64)
+
         # self.arr_pos = np.array([-0.0075 ,-0.0068 , 0.8614], dtype=np.float64)
         # self.arr_quat = np.array([ 0.7111 , 0.015,  -0.0019 , 0.703 ], dtype=np.float64)
+
         self.arr_pos = np.array( [-0.194,  0.468  ,0.939], dtype=np.float64)
         self.arr_quat = np.array([ 0.692 ,-0.008 ,-0.004  ,0.722], dtype=np.float64)
 
@@ -241,12 +243,15 @@ class MuJoCoSimulation:
 
     def _apply_joint_torque(self):
         # 当前关节状态#TODO:
-        q = self.data.qpos[ 7:7+self.dof_num].reshape(-1, 1)
-        dq = self.data.qvel[ 6:6+ self.dof_num].reshape(-1, 1)
+        q = self.data.qpos[ 7:7+self.dof_num].reshape(-1, 1).copy()
+        q_temp = q.copy()
+        q_temp[6] = q_temp[6] + 0.4
+        # q[4] = 
+        dq = self.data.qvel[6:6+ self.dof_num].reshape(-1, 1)
 
         # τ = kp*(q_d - q) + kd*(dq_d - dq) + τ_ff
         self.input_tq = (
-                self.kp_cmd * (self.pos_cmd - q) +
+                self.kp_cmd * (self.pos_cmd - q_temp) +
                 self.kd_cmd * (self.vel_cmd - dq) #+
                # self.tau_ff
         )
@@ -321,7 +326,8 @@ class MuJoCoSimulation:
 
 
         # ----- 关节 -----
-        q = self.data.qpos[7:7+ self.dof_num]
+        q = self.data.qpos[7:7+ self.dof_num].copy()
+        q[6] = q[6] + 0.4
         dq = self.data.qvel[6 :6+ self.dof_num]
         tau = self.input_tq.flatten()
         # print(f"[IMU] tau: {tau}")
@@ -342,7 +348,7 @@ class MuJoCoSimulation:
         #     dq.astype(np.float32),
         #     tau.astype(np.float32)
         # ))
-        
+        # q_temp = 
         payload = np.concatenate([
             [self.timestamp],
             rpy.flatten(),

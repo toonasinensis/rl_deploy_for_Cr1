@@ -129,7 +129,7 @@ else ()
 endif ()
 
 message("${THIRD_PARTY}/onnxruntime/${BUILD_PLATFORM}/lib/")
-target_link_libraries(rl_deploy interface  -lpthread -lm -lrt -ldl -lstdc++ ${dr_lib} onnxruntime)
+target_link_libraries(rl_deploy interface   -lpthread -lm -lrt -ldl -lstdc++ ${dr_lib} onnxruntime)
 
 if (BUILD_SIM)
     message("build simulation")

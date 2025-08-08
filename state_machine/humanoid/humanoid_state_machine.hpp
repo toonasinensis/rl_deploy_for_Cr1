@@ -28,6 +28,7 @@
 #include "data_streaming.hpp"
 #include "safe_controller.hpp"
 #include "mimic_ready_state.hpp"
+#include "calibrate_state.hpp"
 // #define SIMULATION_MODE
 namespace humanoid{
 class HumanoidStateMachine : public StateMachineBase{
@@ -37,6 +38,7 @@ private:
     std::shared_ptr<StateBase> joint_damping_controller_;
     std::shared_ptr<StateBase> rl_controller_;
     std::shared_ptr<StateBase> mimic_init_controller_;
+    std::shared_ptr<StateBase> calibrate_controller_;
 
     // StateName current_state_name_, next_state_name_;
 
@@ -111,6 +113,7 @@ public:
         idle_controller_ = std::make_shared<IdleState>(robot_name_, "idle_state", data_ptr);
         test_controller_ = std::make_shared<TestState>(robot_name_, "test_state", data_ptr);
         mimic_init_controller_ = std::make_shared<MimicReadyState>(robot_name_, "mimic_init_state", data_ptr);
+        calibrate_controller_ = std::make_shared<CalibrateState>(robot_name_, "calibrate_state", data_ptr);
         joint_damping_controller_ = std::make_shared<JointDampingState>(robot_name_, "joint_damping", data_ptr);
         rl_controller_ = std::make_shared<RLControlState>(robot_name_, "rl_control", data_ptr);
 
@@ -152,6 +155,10 @@ public:
             }
             case StateName::kMimicReady:{
                 return mimic_init_controller_;
+            }
+            case StateName::kCalibrateMode:{
+                        return calibrate_controller_;
+
             }
             default:{
                 std::cerr << "error state name" << std::endl;

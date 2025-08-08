@@ -188,7 +188,7 @@ private:
         robot_error_state_.driver_error = 0;
         for(int i=0;i<status_word.size();++i){
             if(status_word[i]!=1){
-                // std::cout << "driver " << i << " status word : " << std::hex << status_word[i] << std::endl;
+                std::cout << "driver " << i << " status word : " << std::hex << status_word[i] << std::endl;
                 error_driver_map_[uint8_t(i)] = status_word[i];
                 robot_error_state_.driver_error = 1;
                 res = false;

@@ -2,6 +2,8 @@
 #define CR1_HARDWARE_INTERFACE_HPP_
 
 #include "ecan_hardware_interface.hpp"
+#include "json.hpp"
+using json = nlohmann::json;
 
 class CR1HardwareInterface : public EcanHardwareInterface
 {
@@ -44,6 +46,7 @@ protected:
     }
 
 public:
+
     CR1HardwareInterface(const std::string& robot_name):EcanHardwareInterface(robot_name,31){
         // float init_pos_offset[12] =                             
         //                     {-0., 0., -0., -10., -0., -0.,
@@ -59,12 +62,18 @@ public:
         //                         1, -1, 1, -1, -1, -1,
         //                         1, -1, 1, 1, 1, 1, 1,
         //                         -1, 1, 1, -1, 1, 1, 1};
+       
+
+
         float init_pos_offset[31] = {100., 0., 0.,//腰 wristX Y限位太难标了，标在0，相对准确
                                     90., -25., 170., -44., 170., -90., -90.,//左手
                                     90., 25., -170., -44., -170., -90., 90.,//右手
                                     0*90., -25., -30., -10., 45., 35.,//左腿
                                     0*90., 25., 30., -10., 45., -35.,//右腿
                                     0., 0.};//头
+        
+            
+
         float joint_dir[31] = { -1, 1, 1,//腰
                                 -1, 1, 1, -1, 1, 1, 1,//左手
                                 1, 1, 1, -1, 1, 1, 1,//右手

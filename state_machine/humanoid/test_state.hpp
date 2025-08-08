@@ -129,6 +129,7 @@ public:
         if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::WaitingForStand)) return StateName::kIdle;
         if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::MimicReady)) return StateName::kMimicReady;
         if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::RLControlMode)) return StateName::kRLControl;
+        if(uc_ptr_->GetUserCommand()->target_mode == uint8_t(RobotMotionState::CalibrateMode)) return StateName::kCalibrateMode;
         return StateName::kStandUp;
     }
 };

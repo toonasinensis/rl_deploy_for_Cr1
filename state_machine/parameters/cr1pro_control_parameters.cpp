@@ -143,11 +143,7 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     torque_limit_ = VecXf::Zero(dof_num_);
 
 
-
-    
-    
-
-    default_joint_pos = VecXf(dof_num_);
+    default_joint_pos = VecXf::Zero(dof_num_);
 
     //this is for rl,but the squence is robot
     // HIP_Y

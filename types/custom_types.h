@@ -43,6 +43,7 @@ namespace types{
         LieDown         = 4,
         RLControlMode   = 6,
         MimicReady      = 7,
+        CalibrateMode   = 8,
     };
 
     enum RobotGaitType{
@@ -58,6 +59,8 @@ namespace types{
         kLieDown      = 4,
         kRLControl    = 6,
         kMimicReady   = 7,
+        kCalibrateMode= 8,
+
     };
 
     enum RemoteCommandType{

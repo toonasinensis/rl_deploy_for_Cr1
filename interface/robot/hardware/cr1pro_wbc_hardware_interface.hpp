@@ -61,9 +61,26 @@ public:
         //                         1, -1, 1, -1, -1, -1,
         //                         1, -1, 1, 1, 1, 1, 1,
         //                         -1, 1, 1, -1, 1, 1, 1};
+         std::ifstream input_file("../config/config.json");
+        json config;
+        input_file>>config;
+        std::vector<float> saved_offet_pos;
+        if(config.contains("offset_data"))
+        {
+        std::cout<<"use save offset !!!"<<std::endl;
+
+          saved_offet_pos = config["offset_data"].get<std::vector<float>>();
+        }
+        else{
+            std::cout<<"init zeros offset"<<std::endl;
+            saved_offet_pos = std::vector<float>(31,0.f); 
+            config["offset_data"]  = saved_offet_pos;
+        }
+
+
         float init_pos_offset[31] = {100., 0., 0.,//腰 wristX Y限位太难标了，标在0，相对准确
-                                    90., -25., 170., -44., 170., -90., -90.,//左手
-                                    90., 25., -170., -44., -170., -90., 90.,//右手
+                                    90., -0., 170., -44., 170., -90., -90.,//左手
+                                    90., 0., -170., -44., -170., -90., 90.,//右手
                                     0*90., -25., -30., -10., 45., 35.,//左腿
                                     0*90., 25., 30., -10., 45., -35.,//右腿
                                     0., 0.};//头
@@ -74,6 +91,21 @@ public:
                                 -1, 1, 1, -1, -1, -1,//右腿
                                 1, 1//头
                                 };
+
+
+        
+
+        if(31!=saved_offet_pos.size())
+        {
+            std::cout<<"saved_offet_pos err!!"<<std::endl;
+        }
+
+        for (int i=0;i<saved_offet_pos.size();i++)
+        {
+            init_pos_offset[i]-= Rad2Deg(saved_offet_pos[i]);
+        }
+
+
         // float init_pos_offset[21] = {100.,//腰 wristX Y限位太难标了，标在0，相对准确
         //                             90., -25., 170., -44.,//左手
         //                             90., 25., -170., -44.,//右手
@@ -92,6 +124,11 @@ public:
             data_updated_[i] = false;
             joint_config_[i].dir = joint_dir_[i];
             joint_config_[i].offset = Deg2Rad(pos_offset_[i]);
+        }
+        for(int i=0;i<31;i++)
+        {
+        std::cout<<"after change"<<pos_offset_[i]<<std::endl;
+
         }
     }
     ~CR1_PRO_WBC_HardwareInterface(){}

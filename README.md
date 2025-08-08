@@ -1,6 +1,9 @@
 # RL_DEPLOY
 
 ## 下载编译
+sudo apt update
+sudo apt install g++-aarch64-linux-gnu
+
 
 ```bash
 

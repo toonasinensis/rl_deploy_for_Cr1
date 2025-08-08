@@ -6,11 +6,24 @@
 #include <cstdio>
 #include <functional>
 #include <termios.h>
+#include <string>
 
+#include <cctype>
+#include <sstream>
 #define AXIS_STEP 0.1
 
 using namespace interface;
 using namespace types;
+
+ 
+
+bool isNumber(const std::string& str) {
+    std::stringstream ss(str);
+    double num;
+    ss >> num;
+    return ss.eof() && !ss.fail();  // 如果整个字符串是有效数字，则返回 true
+}
+
 
 class KeyboardInterface : public UserCommandInterface
 {
@@ -93,11 +106,18 @@ public:
                         if(input=='v'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::MimicReady);
                         }
-                        if(input=='/'){
-                            usr_cmd_->target_mode = uint8_t(RobotMotionState::RLControlMode);
-                        }
+                        // if(input=='/'){
+                        //     usr_cmd_->target_mode = uint8_t(RobotMotionState::RLControlMode);
+                        // }
                         if(input=='l'){
                             usr_cmd_->target_mode = uint8_t(RobotMotionState::LieDown);
+                        }
+                        if(input=='c'){
+                            // std::cout<<"????????"<<std::endl;
+
+                            usr_cmd_->target_mode = uint8_t(RobotMotionState::CalibrateMode);
+                            std::cout << "Target mode: " << static_cast<int>(usr_cmd_->target_mode) << std::endl;
+
                         }
                     break;
                     case RobotMotionState::MimicReady:
@@ -152,6 +172,33 @@ public:
                         ClipNumber(usr_cmd_->forward_vel_scale, -1., 1.);
                         ClipNumber(usr_cmd_->side_vel_scale, -1., 1.);
                         ClipNumber(usr_cmd_->turnning_vel_scale, -1., 1.);
+                    break;
+                    case CalibrateMode:
+                        if(input=='z'){
+                            usr_cmd_->target_mode = uint8_t(RobotMotionState::StandingUp);
+                        }
+                        if(input=='.') {//>
+                            usr_cmd_->calibrateJoint = 1.0/180 * 3.14;
+                            forward_time_record = current_time;
+                        }
+                        else if(input==',') {//<
+                            usr_cmd_->calibrateJoint = -1.0/180 * 3.14;
+                            forward_time_record = current_time;
+                        }
+                        if((input==']')) {
+                            usr_cmd_->target_joint += 1;
+                            forward_time_record = current_time;
+                        }
+                        else if(input=='[') {
+                            usr_cmd_->target_joint -= 1;
+                            forward_time_record = current_time;
+                        }
+                        else if(input=='f') {
+                            usr_cmd_->finish_calibrate = true;
+                            forward_time_record = current_time;
+                        }
+
+
                     break;
                     default:
                         break;
