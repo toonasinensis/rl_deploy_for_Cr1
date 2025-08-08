@@ -14,7 +14,7 @@
 
 #include "policy_runner_base.hpp"
 #include "ShmReader.hpp"
-
+#include <iomanip>
 #include <chrono>
 
 #include "json_loader.hpp"
@@ -45,25 +45,23 @@ private:
     Vec3f cmd_vel_scale_ = Vec3f(0., 0., 0.);
 
     int obs_dim_, obs_history_num_, act_dim_;
-    // int obs_history_num_ = 5;
     int dof_dim = 31;
     int obs_total_dim_;
-    int capture_point_num_ = 22;
     VecXf current_observation_;
     VecXf obs_buff;
     VecXf action_, last_action_, action_all_rl, action_all_rbt;//后面两个分别是rl顺序和rbt顺序
     std::vector<int64_t> input_shape_;
 
- 
+    bool use_json_actions = false; // Comment this line to use ONNX inference, uncomment to use JSON actions
     Ort::SessionOptions session_options_;
     Ort::Session session_{nullptr};
     Ort::MemoryInfo memory_info_{nullptr};
     Ort::Env env_;
     std::vector<Ort::Value> ort_inputs_;
     // int obs_dim_ = 0
-    const char* input_names_[1] = {"input"}; // must keep the same as model export
+    const char* input_names_[1] = {"state"}; // must keep the same as model export
     const char* output_names_[1] = {"output"};
-
+    std::string json_path_ = "/home/ubuntu/il/PBHC/eval_log.json";
     JsonLoader loader;
     std::vector<VecXf> joint_data;
 
@@ -81,15 +79,11 @@ private:
 };
 
     std::vector<std::string> policy_order = {
-        "left_hip_y_joint", "right_hip_y_joint", "waist_z_joint",
-        "left_hip_x_joint", "right_hip_x_joint", "waist_x_joint",
-        "left_hip_z_joint", "right_hip_z_joint", "waist_y_joint",
-        "left_knee_joint", "right_knee_joint", "left_shoulder_y_joint", "right_shoulder_y_joint",
-        "left_ankle_y_joint", "right_ankle_y_joint",
-        "left_shoulder_x_joint", "right_shoulder_x_joint",
-        "left_ankle_x_joint", "right_ankle_x_joint",
-        "left_shoulder_z_joint", "right_shoulder_z_joint",
-        "left_elbow_joint", "right_elbow_joint"
+        "left_hip_y_joint", "left_hip_x_joint", "left_hip_z_joint", "left_knee_joint", "left_ankle_y_joint", "left_ankle_x_joint",
+        "right_hip_y_joint", "right_hip_x_joint", "right_hip_z_joint", "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint",
+        "waist_z_joint", "waist_x_joint", "waist_y_joint",
+        "left_shoulder_y_joint", "left_shoulder_x_joint", "left_shoulder_z_joint", "left_elbow_joint",
+        "right_shoulder_y_joint", "right_shoulder_x_joint", "right_shoulder_z_joint", "right_elbow_joint"
     };
 
     std::vector<std::string> pd_order = {
@@ -103,15 +97,15 @@ private:
     std::vector<int> policyandpd2robot_idx;
 
     //rl 相关参数
-    float obs_scales_omega = 1.0;
+    float obs_scales_omega = 0.25;
     float obs_scales_projected_gravity = 1.0;
     float obs_scales_joint_pos = 1.0;
-    float obs_scale_joint_vel = 1.0;
+    float obs_scale_joint_vel = 0.05;
     float obs_scale_actions = 1.0;
+    float joint_data_now = 0.0;
+    float action_scale = 1.0;
 
-    float action_scale = 0.25;
-
-     int data_cnt=0;
+    int data_cnt=0;
     std::chrono::time_point<std::chrono::high_resolution_clock> last_time ;
 
 
@@ -136,8 +130,8 @@ public:
         // 加载模型
         session_ = Ort::Session(env_, policy_path_.c_str(), session_options_);
 
-        obs_dim_ = 98;
-        obs_total_dim_ = 490;
+        obs_dim_ = 76;
+        obs_total_dim_ = 380;
         act_dim_ = 23;
         obs_history_num_ = 5;
         assert(obs_dim_ * obs_history_num_ == obs_total_dim_);
@@ -147,8 +141,7 @@ public:
         for(int i = 0; i < 10; ++i)
         {
             obs_buff.setZero(obs_total_dim_); // 你这里应该用 obs_total_dim_
-
-              action_ = Onnx_infer( obs_buff );
+            action_ = Onnx_infer( obs_buff );
         }
         
         std::cout<<"model import right!!!!"<<std::endl;
@@ -174,23 +167,28 @@ public:
         policy_and_pd_order = policy_order;   //+pd_order;
         policy_and_pd_order.insert(policy_and_pd_order.end(), pd_order.begin(), pd_order.end());
 
-    robot2policy_idx = generate_permutation(robot_order, policy_order);
-    policyandpd2robot_idx = generate_permutation(policy_and_pd_order, robot_order);
+        robot2policy_idx = generate_permutation(robot_order, policy_order);
+        policyandpd2robot_idx = generate_permutation(policy_and_pd_order, robot_order);
 
-    if (!loader.load("../config/data_output.json")) {
-            std::cerr<<"no data file"<<std::endl;
-     }
-     else{
-        if (loader.get_key_data("des_joint_pos", joint_data)) {
-            std::cout << "Loaded " << joint_data.size() << " entries.\n";
-            for (const auto& vec : joint_data) {
-                std::cout << vec.size() << std::endl;
+        
+        
+        if (use_json_actions) {
+            if (!loader.load(json_path_)) {
+                std::cerr << "No data file found at " << json_path_ << std::endl;
+                throw std::runtime_error("Failed to load JSON file");
             }
-        } else {
-            std::cerr << "Failed to read key: des_joint_pos\n";
+            if (!loader.get_key_data("actions", joint_data)) {
+                std::cerr << "Failed to read key: actions" << std::endl;
+                throw std::runtime_error("Missing actions key in JSON");
+            }
+            for (const auto& vec : joint_data) {
+                if (vec.size() != act_dim_) {
+                    std::cerr << "JSON action size mismatch: expected " << act_dim_ << ", got " << vec.size() << std::endl;
+                    throw std::runtime_error("Invalid action size in JSON");
+                }
+            }
+            std::cout << "Loaded " << joint_data.size() << " action entries from JSON.\n";
         }
-     }
-
     }
     ~CR1PROWBCPolicyRunner(){}
 
@@ -242,7 +240,7 @@ public:
 
         std::vector<Ort::Value> inputs;
         inputs.emplace_back(std::move(input_tensor));  // 避免拷贝构造
-
+        
         auto outputs = session_.Run(
             Ort::RunOptions{nullptr},
             input_names_,
@@ -265,8 +263,7 @@ public:
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(this_time - last_time).count();
         last_time = this_time;
 
-            std::cout << std::fixed << std::setprecision(3)\
-              << "Elapsed: " << duration << " ms" << std::endl;
+        // std::cout << std::fixed << std::setprecision(3) << "Elapsed: " << duration << " ms" << std::endl;
 
         // below is make cur obs :
         Vec3f base_omgea = ro.base_omega * obs_scales_omega;
@@ -285,7 +282,7 @@ public:
             
         }
 
-        auto joint_data_now = joint_data.at(data_cnt);
+        joint_data_now += 0.02/5.06;
 
         for (int i =0;i<act_dim_;i++)
         {
@@ -304,12 +301,12 @@ public:
         //     0.146957f, -0.165495f, 0.234234f, 0.256933f, 0.325049f, -0.107587f,
         //     -0.118877f, -0.0637089f, -0.0537505f, 0.534397f, -0.516656f, 0.065583f,
         //     -0.0303705f, -0.430121f, 0.287803f, 1.24668f, 1.23028f;
-        my_vec << 
-        -0.063f, -0.144f, -0.014f, -0.057f, 0.037f, 0.049f, -0.019f, -0.168f, 0.002f, 0.008f,
-        0.186f, -0.246f, -0.328f, 0.079f, 0.04f, 0.161f, -0.137f, 0.058f, 0.09f, -0.328f,
-        0.502f, 1.411f, 1.441f;
-
-        joint_pos_rl = joint_pos_rl - joint_pos_default;
+        // my_vec << 
+        // -0.063f, -0.144f, -0.014f, -0.057f, 0.037f, 0.049f, -0.019f, -0.168f, 0.002f, 0.008f,
+        // 0.186f, -0.246f, -0.328f, 0.079f, 0.04f, 0.161f, -0.137f, 0.058f, 0.09f, -0.328f,
+        // 0.502f, 1.411f, 1.441f;
+        // std::cout << "data_cnt" << data_cnt << std::endl;
+        // joint_pos_rl = joint_pos_rl - joint_pos_default;
         current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, joint_data_now;
 
         // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
@@ -320,15 +317,31 @@ public:
         // std::cout<<"des_joint"<<my_vec.transpose()<<std::endl;
 
         // make buffer :
-        for (size_t i = 0; i < obs_history_num_ - 1; ++i) {
-            obs_buff.segment(i * obs_dim_, obs_dim_) = obs_buff.segment((i+1) * obs_dim_, obs_dim_);
+        for (size_t i = obs_history_num_ - 1; i > 0; --i) {
+            obs_buff.segment(i * obs_dim_, obs_dim_) = obs_buff.segment((i - 1) * obs_dim_, obs_dim_);
         }
-        obs_buff.segment((obs_history_num_ - 1) * obs_dim_,obs_dim_) = current_observation_;
-        //
+        obs_buff.segment(0, obs_dim_) = current_observation_;
         
-        action_ = Onnx_infer(obs_buff);
-        
-        std::cout<<"action_"<<action_.transpose()<<std::endl;
+        std::cout << std::fixed << std::setprecision(4);
+        std::cout << "obs_buff:\n";
+        for (int i = 0; i < obs_buff.size(); ++i) {
+            std::cout << std::setw(12) << obs_buff(i);
+            if ((i + 1) % 8 == 0 || i == obs_buff.size() - 1) std::cout << std::endl;
+        }
+        if (use_json_actions && !joint_data.empty()) {
+            if (data_cnt >= joint_data.size()) {
+                data_cnt = 0; // Loop back to start
+            }
+            action_ = joint_data[data_cnt];
+        } else {
+            action_ = Onnx_infer(obs_buff);
+        }
+        std::cout << "action_:\n";
+        for (int i = 0; i < action_.size(); ++i) {
+            std::cout << std::setw(12) << action_(i);
+            if ((i + 1) % 8 == 0 || i == action_.size() - 1) std::cout << std::endl;
+        }
+        std::cout << std::endl;
         VecXf no_rl_joint_action = VecXf::Zero(dof_dim - act_dim_);
         action_all_rl << action_, no_rl_joint_action;//把输出为0的，放在后面
         

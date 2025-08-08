@@ -26,7 +26,7 @@ CTRL_IP = "127.0.0.1"
 CTRL_PORT = 30010
 USE_VIEWER = True
 DT = 0.001
-RENDER_INTERVAL = 45
+RENDER_INTERVAL = 40
 
 URDF_INIT = {
     "CR01B-pro": np.array([0, ] * 29, dtype=np.float32)
@@ -122,18 +122,20 @@ class MuJoCoSimulation:
         #         0.0, -0.1189, -0.5167, 0.2878, 1.2303, 0.0, 0.0, 0.0, -0.1114,
         #         0.0076, 0.147, 0.2569, -0.0637, 0.0656, -0.1536, -0.0466, -0.1655, 0.325,
         #         -0.0538, -0.0304]
-        dof_list = [
-            -0.038, 0.051, 0.094, -0.248, 0.156, -0.316, 1.379, 0., 0., 0.,
-            -0.276, -0.203, 0.232, 1.332, 0., 0., 0., -0.1, 0.005, -0.031,
-            0.182, 0.087, -0.085, -0.058, -0.002, -0.079, 0.165, 0.123, 0.227,
 
-        ]
+        dof_list = [0.1052, -0.0872, -0.5236,  
+                    0.2895, 0.2181, -0.2178,  1.1410, 0, 0, 0,
+                    0.3255, -0.1665,  0.2488,  1.1969, 0, 0, 0,
+                    -0.2635,  0.0439,  0.2127,  0.1390,  
+                    0.0000,  0.0000, 
+                    -0.3927, -0.0238, 0.2601,  0.3046,  
+                    0.0000,  0.0000]
 
         self.arr_init_dof = np.array(dof_list, dtype=np.float64)
         # self.arr_pos = np.array([-0.0075 ,-0.0068 , 0.8614], dtype=np.float64)
         # self.arr_quat = np.array([ 0.7111 , 0.015,  -0.0019 , 0.703 ], dtype=np.float64)
-        self.arr_pos = np.array( [-0.194,  0.468  ,0.939], dtype=np.float64)
-        self.arr_quat = np.array([ 0.692 ,-0.008 ,-0.004  ,0.722], dtype=np.float64)
+        self.arr_pos = np.array( [-0.194,  0.468  ,0.95], dtype=np.float64)
+        self.arr_quat = np.array([0.0768, -0.1422,  0.0183,  0.9867], dtype=np.float64)
 
         # print(self.arr_init_dof)
         # import ipdb;ipdb.set_trace();
@@ -189,8 +191,7 @@ class MuJoCoSimulation:
                     self.viewer.sync()
                     t2 = time.time()
                     # print(t2-t1)
-                #
-                # 
+
             
              # dt = time.perf_counter() - t0
             # if dt < DT:

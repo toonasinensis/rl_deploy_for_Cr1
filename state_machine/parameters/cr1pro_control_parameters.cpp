@@ -121,26 +121,26 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
 
     //this is for rl,but the squence is robot
     // HIP_Y
-    default_joint_pos(17) = -0.20;
-    default_joint_pos(23) = -0.20;
+    // default_joint_pos(17) = -0.20;
+    // default_joint_pos(23) = -0.20;
 
-    // KNEE
-    default_joint_pos(20) = 0.42;
-    default_joint_pos(26) = 0.42;
+    // // KNEE
+    // default_joint_pos(20) = 0.42;
+    // default_joint_pos(26) = 0.42;
 
-    // ANKLE_Y
-    default_joint_pos(21) = -0.23;
-    default_joint_pos(27) = -0.23;
+    // // ANKLE_Y
+    // default_joint_pos(21) = -0.23;
+    // default_joint_pos(27) = -0.23;
 
     // ELBOW
-    default_joint_pos(6) = 0.87;
-    default_joint_pos(13) = 0.87;
+    default_joint_pos(6) = 1.57;
+    default_joint_pos(13) = 1.57;
 
     // SHOULDER_X / Y
-    default_joint_pos(4) = 0.18;   // left_shoulder_x
-    default_joint_pos(3) = 0.35;   // left_shoulder_y
-    default_joint_pos(11) = -0.18; // right_shoulder_x                  
-    default_joint_pos(10) = 0.35;  // right_shoulder_y
+    // default_joint_pos(4) = 0.18;   // left_shoulder_x
+    // default_joint_pos(3) = 0.35;   // left_shoulder_y
+    // default_joint_pos(11) = -0.18; // right_shoulder_x                  
+    // default_joint_pos(10) = 0.35;  // right_shoulder_y
 
  
 
@@ -215,7 +215,7 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     joint_kd << waist_kd, arm_kd, arm_kd,leg_kd, leg_kd, neck_kd; 
     // joint_kp = joint_kp*0.1;
 
-    common_policy_path_ = GetAbsPath()+"/../policy/tmppolicy_walk.onnx";
+    common_policy_path_ = GetAbsPath()+"/../policy/cr1_pro_walk.onnx";
 
 }
 
