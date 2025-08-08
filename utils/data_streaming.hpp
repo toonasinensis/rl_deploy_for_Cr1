@@ -88,7 +88,7 @@ private:
 
 
 public:
-    DataStreaming(bool enable_online_plot=false, bool enable_data_record=false, const std::string& ip="192.168.1.165", int port=9870)://虚拟机无线ip172.16.11.84，有线ip192.168.1.165
+    DataStreaming(bool enable_online_plot=false, bool enable_data_record=false, const std::string& ip="10.21.41.72", int port=9870)://虚拟机无线ip172.16.11.84，有线ip192.168.1.165
     enable_online_plot_(enable_online_plot),
     enable_data_record_(enable_data_record),
     remote_port_(port),

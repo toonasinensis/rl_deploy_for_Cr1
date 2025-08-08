@@ -352,7 +352,9 @@ public:
 
         ra.goal_joint_vel.setZero();
         auto next_time = std::chrono::high_resolution_clock::now();
-        // ra.tau_ff(0) = 999;
+        #ifdef DSIMULATION_MODE
+        ra.tau_ff(0) = 999;
+        #endif
         auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(next_time - this_time).count();
             // std::cout << std::fixed << std::setprecision(4)\
             //   << "infer Elapsed: " << duration2 << " us" << std::endl;

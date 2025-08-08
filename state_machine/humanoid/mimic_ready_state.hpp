@@ -62,6 +62,21 @@ public:
     virtual void OnEnter() {
         GetRobotJointValue();
         RecordJointData();
+
+        goal_joint_pos_ = VecXf::Zero(cp_ptr_->dof_num_);
+
+        std::ifstream input_file("../config/data_output.json");
+        json data_output;
+        input_file>>data_output;
+        // std::vector<float> save_offset_pos(goal_joint_pos_.data(),goal_joint_pos_.data()+goal_joint_pos_.size());
+        std::vector<float> saved_offet_pos = data_output["mimic_init_joint_pos"].get<std::vector<float>>();
+        
+        assert(saved_offet_pos.size()==cp_ptr_->dof_num_-2)// no neck !!!sb!!!
+        for (int i=0;i<saved_offet_pos.size();i++)
+        {
+            goal_joint_pos_(i) = saved_offet_pos.at(i);
+        }
+        std::cout<<"goal_joint_pos_ "<<goal_joint_pos_.transpose()<<std::endl;
         StateBase::msfb_.UpdateCurrentState(RobotMotionState::MimicReady);
     };
     virtual void OnExit() {
@@ -74,16 +89,7 @@ public:
         VecXf kp_ = VecXf::Zero(cp_ptr_->dof_num_);
         VecXf kd_ = VecXf::Zero(cp_ptr_->dof_num_);
         joint_cmd_ = MatXf::Zero(cp_ptr_->dof_num_, 5);
-        goal_joint_pos_ = VecXf::Zero(cp_ptr_->dof_num_);
-
-        goal_joint_pos_ << 0.025, 0.006, -0.103, 0.006, 0.360, -0.545, 1.394, 0.000,\
-         0.000, 0.000, -0.004, -0.360, 0.508, 1.396, 0.000, 0.000, 0.000, -0.171, 0.201, \
-         0.257, 0.312, -0.135, -0.161, -0.118, -0.160, -0.140, 0.090, -0.026, 0.165;
-
-        // goal_joint_pos_<<  -0.038, 0.051, 0.094, -0.248, 0.156, -0.316, 1.379, 0., 0., 0.,
-        //     -0.276, -0.203, 0.232, 1.332, 0., 0., 0., -0.1, 0.005, -0.031,
-        //     0.182, 0.087, -0.085, -0.058, -0.002, -0.079, 0.165, 0.123, 0.227;
-
+        
 
         //-------------------关节测试-----------------//
         float init_time = 3.;
