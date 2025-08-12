@@ -12,7 +12,9 @@
 #define HUMANOID_MIMIC_STATE_HPP_
 
 #include "state_base.h"
+#include "json.hpp"
 
+using json = nlohmann::json;
 namespace humanoid{
 class MimicReadyState : public StateBase{
 private:
@@ -66,15 +68,27 @@ public:
         goal_joint_pos_ = VecXf::Zero(cp_ptr_->dof_num_);
 
         std::ifstream input_file("../config/data_output.json");
+        if(!input_file.is_open()){
+            std::cerr << "Failed to open data_output.json" << std::endl;
+            return;
+        }
         json data_output;
         input_file>>data_output;
-        // std::vector<float> save_offset_pos(goal_joint_pos_.data(),goal_joint_pos_.data()+goal_joint_pos_.size());
-        std::vector<float> saved_offet_pos = data_output["mimic_init_joint_pos"].get<std::vector<float>>();
-        
-        assert(saved_offet_pos.size()==cp_ptr_->dof_num_-2)// no neck !!!sb!!!
-        for (int i=0;i<saved_offet_pos.size();i++)
+        std::vector<float> saved_init_pos;
+        auto& json_array = data_output["mimic_init_joint_pos"];
+
+        if (json_array.is_array() && json_array.size() > 0 && json_array.at(0).is_array()) {
+            // 二维数组，取第一行
+            saved_init_pos = json_array.at(0).get<std::vector<float>>();
+        } else {
+            // 一维数组
+            saved_init_pos = json_array.get<std::vector<float>>();
+        }
+
+        assert(saved_init_pos.size()==cp_ptr_->dof_num_-2);// no neck !!!sb!!!
+        for (int i=0; i<saved_init_pos.size();i++)
         {
-            goal_joint_pos_(i) = saved_offet_pos.at(i);
+            goal_joint_pos_(i) = saved_init_pos.at(i);
         }
         std::cout<<"goal_joint_pos_ "<<goal_joint_pos_.transpose()<<std::endl;
         StateBase::msfb_.UpdateCurrentState(RobotMotionState::MimicReady);

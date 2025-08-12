@@ -89,6 +89,10 @@ public:
         std::ifstream input_file("../config/config.json");
         json config;
         input_file>>config;
+        if(!input_file.is_open()){
+            std::cerr << "Failed to open config.json,add an empty config.json!" << std::endl;
+            
+        }
         // std::vector<float> save_offset_pos(goal_joint_pos_.data(),goal_joint_pos_.data()+goal_joint_pos_.size());
         std::vector<float> saved_offet_pos = config["offset_data"].get<std::vector<float>>();
         

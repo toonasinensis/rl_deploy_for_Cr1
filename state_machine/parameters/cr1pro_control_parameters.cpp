@@ -242,9 +242,10 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     
 
     //this is for 恢复0位
-
-    waist_kp_pc << 600., 600., 1800.;
-    waist_kd_pc << 6., 6., 12.;
+    //temp small
+    
+    waist_kp_pc << 300., 300., 600.;
+    waist_kd_pc << 3., 3., 6.;
 
 
     arm_kp_pc << 600., 600., 600., 600., 90., 90., 90.;
