@@ -122,7 +122,9 @@ private:
     }
 
     bool IsJointDataNormal(){
-        // return true;
+        #ifdef SIMULATION_MODE
+        return true;
+        #endif
         double ri_ts_ = ri_ptr_->GetInterfaceTimeStamp();// / 1000.;
         VecXf joint_pos = ri_ptr_->GetJointPosition();
         VecXf joint_vel = ri_ptr_->GetJointVelocity();

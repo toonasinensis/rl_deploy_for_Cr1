@@ -264,16 +264,16 @@ public:
         for(int i=0;i<ri_ptr_->dof_num_;++i){
             file_ << "tau_cmd"+std::to_string(i) << ",";
         }
-        for(int i=0;i<ri_ptr_->dof_num_;++i){
-            file_ << "temp"+std::to_string(i) << ",";
-        }
-        for(int i=0;i<ri_ptr_->dof_num_;++i){
-            file_ << "d_temp"+std::to_string(i) << ",";
-        }
-
         // for(int i=0;i<ri_ptr_->dof_num_;++i){
-        //     file_ << "q_cmd"+std::to_string(i) << ",";
+        //     file_ << "temp"+std::to_string(i) << ",";
         // }
+        // for(int i=0;i<ri_ptr_->dof_num_;++i){
+        //     file_ << "d_temp"+std::to_string(i) << ",";
+        // }
+
+        for(int i=0;i<ri_ptr_->dof_num_;++i){
+            file_ << "q_cmd"+std::to_string(i) << ",";
+        }
         // for(int i=0;i<ri_ptr_->dof_num_;++i){
         //     file_ << "tau_ff"+std::to_string(i) << ",";
         // }
@@ -310,15 +310,15 @@ public:
         for(int i=0;i<data_json_["joint"].at("tau_cmd").size();++i){
             oss << data_json_["joint"].at("tau_cmd")[i] << ",";
         }
-        for(int i=0;i<data_json_["joint"].at("temp").size();++i){
-            oss << data_json_["joint"].at("temp")[i] << ",";
-        }
-        for(int i=0;i<data_json_["joint"].at("d_temp").size();++i){
-            oss << data_json_["joint"].at("d_temp")[i] << ",";
-        }
-        // for(int i=0;i<data_json_["joint"].at("q_cmd").size();++i){
-        //     oss << data_json_["joint"].at("q_cmd")[i] << ",";
+        // for(int i=0;i<data_json_["joint"].at("temp").size();++i){
+        //     oss << data_json_["joint"].at("temp")[i] << ",";
         // }
+        // for(int i=0;i<data_json_["joint"].at("d_temp").size();++i){
+        //     oss << data_json_["joint"].at("d_temp")[i] << ",";
+        // }
+        for(int i=0;i<data_json_["joint"].at("q_cmd").size();++i){
+            oss << data_json_["joint"].at("q_cmd")[i] << ",";
+        }
         // for(int i=0;i<data_json_["joint"].at("tau_ff").size();++i){
         //     oss << data_json_["joint"].at("tau_ff")[i] << ",";
         // }

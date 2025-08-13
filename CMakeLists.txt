@@ -24,8 +24,8 @@ endif ()
 
 if (BUILD_SIM)
 # 全局定义宏（对所有目标生效）
-add_definitions(-DSIMULATION_MODE)
-# 或赋值：add_definitions(-DSIMULATION_MODE=1)
+# add_definitions(-DSIMULATION_MODE)
+add_definitions(-DSIMULATION_MODE=1)
 endif()
 
 message("BUILD_PLATFORM: ${BUILD_PLATFORM}")

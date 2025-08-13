@@ -135,8 +135,8 @@ public:
         // 加载模型
         session_ = Ort::Session(env_, policy_path_.c_str(), session_options_);
 
-        obs_dim_ = 75; // 98;
-        obs_total_dim_ = 375;// 490;
+        obs_dim_ = 79; // 98;
+        obs_total_dim_ = 395;// 490;
         act_dim_ = 23;
         obs_history_num_ = 5;
         assert(obs_dim_ * obs_history_num_ == obs_total_dim_);
@@ -169,6 +169,14 @@ public:
         //确保变量全部强制设为0，防止因为变长，导致出现未知的数字：
         ra.tau_ff.setZero();
         ra.goal_joint_vel.setZero();
+
+        // ra.kp.setZero();
+        // ra.kd.setZero();
+        // ra.goal_joint_pos.setZero();
+        // ra.tau_ff[0] = 1.0;
+        // ra.tau_ff[1] = 1.0;
+        // ra.tau_ff[2] = 1.0;
+        // ra.tau_ff[27] = 1.0;
 
         policy_and_pd_order = policy_order;   //+pd_order;
         policy_and_pd_order.insert(policy_and_pd_order.end(), pd_order.begin(), pd_order.end());
@@ -265,7 +273,17 @@ public:
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(this_time - last_time).count();
         last_time = this_time;
         auto phase_time = std::chrono::duration_cast<std::chrono::milliseconds>(this_time - state_start_time).count();
-        auto phase = (float)phase_time / (float) (1022 * 20);
+
+         // std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;
+        if( data_cnt >= joint_data.size())
+        {
+            data_cnt = 0;//保持最后一帧数据
+            
+        }
+
+        auto joint_data_now = joint_data.at(data_cnt);
+
+        auto phase = (float)phase_time / (float) (joint_data.size() * 20);
         Vec4f phase_vec = Vec4f({sin(2 * M_PI * phase), cos(2 * M_PI * phase), sin(4 * M_PI * phase), cos(4 * M_PI * phase)});
 
             std::cout << std::fixed << std::setprecision(3)\
@@ -281,14 +299,7 @@ public:
         VecXf joint_vel_rl = VecXf(act_dim_);
         VecXf joint_pos_default = VecXf(act_dim_);// in rl squenece
 
-        // std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;
-        if( data_cnt >= joint_data.size())
-        {
-            data_cnt = 0;//保持最后一帧数据
-            
-        }
-
-        auto joint_data_now = joint_data.at(data_cnt);
+        // std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;   
 
         for (int i =0;i<act_dim_;i++)
         {
@@ -313,7 +324,7 @@ public:
         0.502f, 1.411f, 1.441f;
 
         joint_pos_rl = joint_pos_rl - joint_pos_default;
-        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_; //my_vec;
+        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, phase_vec; //my_vec;
 
         // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
         // std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;
@@ -352,7 +363,7 @@ public:
 
         ra.goal_joint_vel.setZero();
         auto next_time = std::chrono::high_resolution_clock::now();
-        #ifdef DSIMULATION_MODE
+        #ifdef SIMULATION_MODE
         ra.tau_ff(0) = 999;
         #endif
         auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(next_time - this_time).count();

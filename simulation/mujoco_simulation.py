@@ -113,8 +113,8 @@ class MuJoCoSimulation:
             data = json.load(f)
             data_copy = copy.deepcopy(data)
 
-        dof_list = np.array(data_copy["mimic_init_root_pos"])
-
+        dof_list = np.array(data_copy["mimic_init_joint_pos"])
+        # import ipdb;ipdb.set_trace();
         self.arr_init_dof = np.array(dof_list, dtype=np.float64)
         # self.arr_pos = np.array([-0.0075 ,-0.0068 , 0.8614], dtype=np.float64)
         # self.arr_quat = np.array([ 0.7111 , 0.015,  -0.0019 , 0.703 ], dtype=np.float64)

@@ -29,9 +29,6 @@
     <mesh name="ankle_x" file="ankle_x.stl"/>
   </asset>
     
-    <default>
-        <joint damping="0.1" armature="0.01" frictionloss="0.1"/>
-    </default>
 
   <worldbody>
         <light directional="true" diffuse=".4 .4 .4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1" castshadow="false"/>
