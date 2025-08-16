@@ -75,8 +75,7 @@ private:
     "left_hip_y_joint", "left_hip_x_joint", "left_hip_z_joint",
     "left_knee_joint", "left_ankle_y_joint", "left_ankle_x_joint",
     "right_hip_y_joint", "right_hip_x_joint", "right_hip_z_joint",
-    "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint","neck1","neck2"
-};
+    "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint","neck1","neck2"};
 
     std::vector<std::string> policy_order = {
         "left_hip_y_joint", "left_hip_x_joint", "left_hip_z_joint", "left_knee_joint", "left_ankle_y_joint", "left_ankle_x_joint",
@@ -292,31 +291,8 @@ public:
         }
 
         current_observation_.setZero(obs_dim_); // 你这里应该用 obs_total_dim_
-        // std::vector<float> des_joint_r =(* des_joint_read).read();
-        // Eigen::VectorXf des_joint_ = Eigen::Map<Eigen::VectorXf>(des_joint_r.data(), des_joint_r.size());//考虑到这个是映射内存，重新复制
-        // Eigen::VectorXf des_joint = des_joint_ * obs_scales_joint_pos;
         VecXf my_vec(23);  // 如果你知道有多少个元素，直接初始化大小
-        // my_vec << 
-        //     -0.111412f, -0.153612f, 0.00538459f, 0.00760133f, -0.0466025f, 0.0491322f,
-        //     0.146957f, -0.165495f, 0.234234f, 0.256933f, 0.325049f, -0.107587f,
-        //     -0.118877f, -0.0637089f, -0.0537505f, 0.534397f, -0.516656f, 0.065583f,
-        //     -0.0303705f, -0.430121f, 0.287803f, 1.24668f, 1.23028f;
-        // my_vec << 
-        // -0.063f, -0.144f, -0.014f, -0.057f, 0.037f, 0.049f, -0.019f, -0.168f, 0.002f, 0.008f,
-        // 0.186f, -0.246f, -0.328f, 0.079f, 0.04f, 0.161f, -0.137f, 0.058f, 0.09f, -0.328f,
-        // 0.502f, 1.411f, 1.441f;
-        // std::cout << "data_cnt" << data_cnt << std::endl;
-        // joint_pos_rl = joint_pos_rl - joint_pos_default;
         current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, joint_data_now;
-
-        // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
-        // std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;
-        // std::cout<<"joint_pos_rl"<<joint_pos_rl.transpose()<<std::endl;
-        // std::cout<<"joint_vel_rl"<<joint_vel_rl.transpose()<<std::endl;
-        // std::cout<<"last_action_"<<last_action_.transpose()<<std::endl;
-        // std::cout<<"des_joint"<<my_vec.transpose()<<std::endl;
-
-        // make buffer :
         for (size_t i = obs_history_num_ - 1; i > 0; --i) {
             obs_buff.segment(i * obs_dim_, obs_dim_) = obs_buff.segment((i - 1) * obs_dim_, obs_dim_);
         }
