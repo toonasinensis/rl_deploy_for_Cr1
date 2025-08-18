@@ -133,8 +133,8 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     // default_joint_pos(27) = -0.23;
 
     // ELBOW
-    default_joint_pos(6) = 1.57;
-    default_joint_pos(13) = 1.57;
+    default_joint_pos(18) = 1.57;
+    default_joint_pos(22) = 1.57;
 
     // SHOULDER_X / Y
     // default_joint_pos(4) = 0.18;   // left_shoulder_x
@@ -175,19 +175,44 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
 
 
     //pd参数:
-     
-    waist_kp <<120,120,120;
-    waist_kd << 3,3,3;
+      // hip_z: 100
+      // hip_x: 100
+      // hip_y: 300
+      // knee: 300
+      // ankle_y: 100
+      // ankle_x: 30
+      // waist_z: 100
+      // waist_x: 100
+      // waist_y: 300
+      // shoulder_y: 100
+      // shoulder_x: 100
+      // shoulder_z: 100
+      // elbow: 100
+      // hip_z: 2.5
+      // hip_x: 2.5
+      // hip_y: 3.75
+      // knee: 3.75
+      // ankle_y: 2.5
+      // ankle_x: 1.0
+      // waist_z: 2.5
+      // waist_x: 2.5
+      // waist_y: 3.75
+      // shoulder_y: 2.5
+      // shoulder_x: 2.5
+      // shoulder_z: 2.5
+      // elbow: 2.5
+    waist_kp << 100, 100, 300;
+    waist_kd << 2.5, 2.5, 3.75;
 
-    arm_kp << 80., 80., 80., 60., 90., 90., 90.;
-    arm_kd << 2., 2., 2., 1.5, 2,2.,2;
+    arm_kp << 100, 100, 100, 100, 30, 30, 30;
+    arm_kd << 2.5, 2.5, 2.5, 2.5, 1, 1, 1;
    
 
-    leg_kp << 150., 150., 100., 150., 100., 30.;
-    leg_kd << 3.75, 3.75, 2.5, 3.75, 2.5, 1. ;
+    leg_kp << 300, 100, 100, 100, 100, 30;
+    leg_kd << 3.75, 2.5, 2.5, 2.5, 2.5, 1;
 
-    neck_kp  <<0.,0.;
-    neck_kd  <<0.,0.;
+    neck_kp  <<0, 0;
+    neck_kd  <<0, 0;
     std::cout << "joint_kp:\n" << joint_kp.transpose() << std::endl;
     std::cout << "waist_kd:\n" << waist_kd.transpose() << std::endl;
     std::cout << "arm_kp:\n" << arm_kp.transpose() << std::endl;

@@ -26,7 +26,7 @@ CTRL_IP = "127.0.0.1"
 CTRL_PORT = 30010
 USE_VIEWER = True
 DT = 0.001
-RENDER_INTERVAL = 40
+RENDER_INTERVAL = 1
 
 URDF_INIT = {
     "CR01B-pro": np.array([0, ] * 29, dtype=np.float32)
@@ -134,7 +134,7 @@ class MuJoCoSimulation:
         self.arr_init_dof = np.array(dof_list, dtype=np.float64)
         # self.arr_pos = np.array([-0.0075 ,-0.0068 , 0.8614], dtype=np.float64)
         # self.arr_quat = np.array([ 0.7111 , 0.015,  -0.0019 , 0.703 ], dtype=np.float64)
-        self.arr_pos = np.array( [-0.194,  0.468  ,0.95], dtype=np.float64)
+        self.arr_pos = np.array( [-0.194,  0.468  ,0.9], dtype=np.float64)
         self.arr_quat = np.array([0.0768, -0.1422,  0.0183,  0.9867], dtype=np.float64)
 
         # print(self.arr_init_dof)

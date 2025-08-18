@@ -91,7 +91,7 @@ private:
                 }
 
                 MatXf res = ra.ConvertToMat();
-                
+                // std::cout << res << "res" << std::endl;
                 ri_ptr_->SetJointCommand(res);
                 run_cnt_record = state_run_cnt_;
                 clock_gettime(CLOCK_MONOTONIC,&end_timestamp);
