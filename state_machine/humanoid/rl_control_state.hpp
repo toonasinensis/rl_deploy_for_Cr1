@@ -97,8 +97,8 @@ private:
                 clock_gettime(CLOCK_MONOTONIC,&end_timestamp);
                 policy_cost_time_ = (end_timestamp.tv_sec-start_timestamp.tv_sec)*1e3 
                                     +(end_timestamp.tv_nsec-start_timestamp.tv_nsec)/1e6;
-                std::cout << "cost_time:  " << policy_cost_time_ << " ms\n";
-                std::cout << "state_run_cnt_:  " << state_run_cnt_ <<std::endl;
+                // std::cout << "cost_time:  " << policy_cost_time_ << " ms\n";
+                // std::cout << "state_run_cnt_:  " << state_run_cnt_ <<std::endl;
             }
             std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
@@ -114,7 +114,6 @@ public:
                                                                                     cp_ptr_->joint_kp, 
                                                                                     cp_ptr_->joint_kd);
             humanoid_wbc_policy_->SetDefaultJointPos(cp_ptr_->default_joint_pos);
-            humanoid_wbc_policy_->SetCmdMaxVel(Vec3f(1.0, 0.5, 1.5));
             humanoid_wbc_policy_->DisplayPolicyInfo();
             
             policy_ptr_ = humanoid_wbc_policy_;

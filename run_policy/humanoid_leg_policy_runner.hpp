@@ -82,15 +82,6 @@ public:
         dof_pos_default_(8) = -pos(2);//hipz
         dof_pos_default_(11) = -pos(5);//anklex
     }
-
-    void SetCmdMaxVel(const Vec3f& vel){
-        for(int i=0;i<3;++i){
-            if(vel(i) < 0){
-                std::cerr << policy_name_ << " max_vel " << i << " set error" << std::endl;
-            }
-        }
-        max_cmd_vel_ = vel;
-    }
 };
 
 

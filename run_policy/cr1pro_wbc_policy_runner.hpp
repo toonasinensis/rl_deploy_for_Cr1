@@ -24,7 +24,6 @@ class CR1PROWBCPolicyRunner : public PolicyRunnerBase
 private:
     VecXf kp_, kd_;
     VecXf dof_pos_default_; //dof_pos
-    Vec3f max_cmd_vel_;
     // int cap_num = 22;
     // ShmFloatReader des_joint_read("/shm_joint", 29);  // float 数量为 12
     // ShmFloatReader des_rot_r("/shm_rot", 4);  // float 数量为 12
@@ -37,12 +36,6 @@ private:
     // std::vector<c10::IValue> obs_vector_{};
 
     const std::string policy_path_;
-
-    float action_scale_ ;
-    float omega_scale_;
-    float dof_vel_scale_;
-
-    Vec3f cmd_vel_scale_ = Vec3f(0., 0., 0.);
 
     int obs_dim_, obs_history_num_, act_dim_;
     int dof_dim = 31;
@@ -101,7 +94,7 @@ private:
     float obs_scales_joint_pos = 1.0;
     float obs_scale_joint_vel = 0.05;
     float obs_scale_actions = 1.0;
-    float joint_data_now = 0.0;
+    float phase_now = 0.0;
     float action_scale = 1.0;
 
     int data_cnt=0;
@@ -134,7 +127,7 @@ public:
         act_dim_ = 23;
         obs_history_num_ = 5;
         assert(obs_dim_ * obs_history_num_ == obs_total_dim_);
-        generate_permutation(robot_order,policy_order);
+
         input_shape_ = {1, obs_total_dim_};
         //dummy obs ,test the model is right
         for(int i = 0; i < 10; ++i)
@@ -176,9 +169,9 @@ public:
                 std::cerr << "No data file found at " << json_path_ << std::endl;
                 throw std::runtime_error("Failed to load JSON file");
             }
-            if (!loader.get_key_data("actions", joint_data)) {
-                std::cerr << "Failed to read key: actions" << std::endl;
-                throw std::runtime_error("Missing actions key in JSON");
+            if (!loader.get_key_data("des_joint_pos", joint_data)) {
+                std::cerr << "Failed to read key: des_joint_pos" << std::endl;
+                throw std::runtime_error("Missing des_joint_pos key in JSON");
             }
             for (const auto& vec : joint_data) {
                 if (vec.size() != act_dim_) {
@@ -281,7 +274,9 @@ public:
             
         }
 
-        joint_data_now += 0.02/5.06;
+        phase_now += 0.02/5.06;
+        
+        if (phase_now > 5.06){phase_now = 0.02;}
 
         for (int i =0;i<act_dim_;i++)
         {
@@ -289,21 +284,26 @@ public:
             joint_vel_rl(i) = ro.joint_vel(robot2policy_idx[i])*obs_scale_joint_vel;
             joint_pos_default(i) = dof_pos_default_(robot2policy_idx[i])*obs_scales_joint_pos;
         }
-
+        
+        joint_pos_rl -= joint_pos_default;
+        // std::cout << "joint_pos_rl" << joint_pos_rl << "joint_pos_default" << joint_pos_default << std::endl;
         current_observation_.setZero(obs_dim_); // 你这里应该用 obs_total_dim_
         VecXf my_vec(23);  // 如果你知道有多少个元素，直接初始化大小
-        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, joint_data_now;
+        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, phase_now;
         for (size_t i = obs_history_num_ - 1; i > 0; --i) {
             obs_buff.segment(i * obs_dim_, obs_dim_) = obs_buff.segment((i - 1) * obs_dim_, obs_dim_);
         }
         obs_buff.segment(0, obs_dim_) = current_observation_;
-        
-        std::cout << std::fixed << std::setprecision(4);
-        std::cout << "obs_buff:\n";
-        for (int i = 0; i < obs_buff.size(); ++i) {
-            std::cout << std::setw(12) << obs_buff(i);
-            if ((i + 1) % 8 == 0 || i == obs_buff.size() - 1) std::cout << std::endl;
-        }
+
+        // debug printing observation
+        // std::cout << std::fixed << std::setprecision(4);
+        // std::cout << "obs_buff:\n";
+        // for (int i = 0; i < obs_buff.size(); ++i) {
+        //     std::cout << std::setw(12) << obs_buff(i);
+        //     if ((i + 1) % 76 == 0 || i == obs_buff.size() - 1) std::cout << std::endl;
+        // }
+
+        // load recorded data or use neural network
         if (use_json_actions && !joint_data.empty()) {
             if (data_cnt >= joint_data.size()) {
                 data_cnt = 0; // Loop back to start
@@ -312,16 +312,20 @@ public:
         } else {
             action_ = Onnx_infer(obs_buff);
         }
-        std::cout << "action_:\n";
-        for (int i = 0; i < action_.size(); ++i) {
-            std::cout << std::setw(12) << action_(i);
-            if ((i + 1) % 8 == 0 || i == action_.size() - 1) std::cout << std::endl;
-        }
-        std::cout << std::endl;
+
+        // debug printing action
+        // std::cout << "action_:\n";
+        // for (int i = 0; i < action_.size(); ++i) {
+        //     std::cout << std::setw(12) << action_(i);
+        //     if ((i + 1) % 76 == 0 || i == action_.size() - 1) std::cout << std::endl;
+        // }
+        // std::cout << std::endl;
+
+        action_ += dof_pos_default_;
         VecXf no_rl_joint_action = VecXf::Zero(dof_dim - act_dim_);
         action_all_rl << action_, no_rl_joint_action;//把输出为0的，放在后面
         
-        // action_all_rl << joint_data_now, no_rl_joint_action;//假的输入
+        // action_all_rl << phase_now, no_rl_joint_action;//假的输入
 
         last_action_ = action_;
         for(int i = 0;i<dof_dim;i++)
@@ -330,7 +334,7 @@ public:
          }
         // std::cout<<"dof_pos_default_"<<dof_pos_default_.transpose()<<std::endl;
         
-        ra.goal_joint_pos = action_all_rbt  * action_scale + dof_pos_default_;
+        ra.goal_joint_pos = action_all_rbt  * action_scale;
 
         ra.goal_joint_vel.setZero();
         auto next_time = std::chrono::high_resolution_clock::now();
@@ -347,16 +351,6 @@ public:
             dof_pos_default_(i) = pos(i);
         }
     }
-
-    void SetCmdMaxVel(const Vec3f& vel){
-        for(int i=0;i<3;++i){
-            if(vel(i) < 0){
-                std::cerr << policy_name_ << " max_vel " << i << " set error" << std::endl;
-            }
-        }
-        max_cmd_vel_ = vel;
-    }
 };
-
 
 #endif

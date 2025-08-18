@@ -9,7 +9,7 @@ cmake .. -DBUILD_PLATFORM=arm -DSEND_REMOTE=ON
 cmake .. -DBUILD_PLATFORM=x86 -DSEND_REMOTE=OFF
 cmake .. -DBUILD_PLATFORM=x86 -DSEND_REMOTE=OFF -DBUILD_SIM=ON
 
-make -j4 
+make -j 
 
 ```
 

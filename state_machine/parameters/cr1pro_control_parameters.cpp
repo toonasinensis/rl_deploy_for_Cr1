@@ -215,7 +215,7 @@ void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，�
     joint_kd << waist_kd, arm_kd, arm_kd,leg_kd, leg_kd, neck_kd; 
     // joint_kp = joint_kp*0.1;
 
-    common_policy_path_ = GetAbsPath()+"/../policy/cr1_pro_walk.onnx";
+    common_policy_path_ = GetAbsPath()+"/../policy/model_35600.onnx";
 
 }
 

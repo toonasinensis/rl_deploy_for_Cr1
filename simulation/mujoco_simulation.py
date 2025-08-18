@@ -252,15 +252,15 @@ class MuJoCoSimulation:
                # self.tau_ff
         )
         # # 调试
-        print("=== [Joint Command Debug] ===")
-        print(f"[Target Pos]:\n{self.pos_cmd.T}")
-        print(f"[Actual Pos]:\n{q.T}")
-        print(f"[Target Vel]:\n{self.vel_cmd.T}")
-        print(f"[Actual Vel]:\n{dq.T}")
-        print(f"[Kp Term]:\n{self.kp_cmd.T}")
-        print(f"[Kd Term]:\n{self.kd_cmd.T}")
-        print(f"[Feedforward Tau]:\n{self.tau_ff.T}")
-        print(f"[Final Torque Output]:\n{self.input_tq.T}")
+        # print("=== [Joint Command Debug] ===")
+        # print(f"[Target Pos]:\n{self.pos_cmd.T}")
+        # print(f"[Actual Pos]:\n{q.T}")
+        # print(f"[Target Vel]:\n{self.vel_cmd.T}")
+        # print(f"[Actual Vel]:\n{dq.T}")
+        # print(f"[Kp Term]:\n{self.kp_cmd.T}")
+        # print(f"[Kd Term]:\n{self.kd_cmd.T}")
+        # print(f"[Feedforward Tau]:\n{self.tau_ff.T}")
+        # print(f"[Final Torque Output]:\n{self.input_tq.T}")
 
         # 写入 control 缓冲区
         self.data.ctrl[:] = self.input_tq.flatten()
