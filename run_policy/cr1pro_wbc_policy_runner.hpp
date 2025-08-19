@@ -84,7 +84,7 @@ private:
     float obs_scales_joint_pos = 1.0;
     float obs_scale_joint_vel = 0.05;
     float obs_scale_actions = 1.0;
-    float phase_now = 0.2/5.06;
+    float phase_now = 0.02/5.06;
     float action_scale = 1.0;
 
     int data_cnt=0;
@@ -136,8 +136,8 @@ public:
         ra.kd.resize(dof_dim);
         ra.tau_ff.resize(dof_dim);
 
-        ra.kp = kp;
-        ra.kd = kd;
+        ra.kp = kp*0.5;
+        ra.kd = kd*0.5;
 
         //确保变量全部强制设为0，防止因为变长，导致出现未知的数字：
         ra.tau_ff.setZero();
@@ -253,7 +253,7 @@ public:
 
         // length of the motion is 5.06, fps:50hz
         phase_now += 0.02/5.06;
-        if (phase_now > 5.06){phase_now = 0.2/5.06;}
+        if (phase_now > 5.06){phase_now = 0.02/5.06;}
         
         for (int i =0;i<act_dim_;i++){
             std::cout << "joint pos" << i << "value" << ro.joint_pos(robot2policy_idx[i])*obs_scales_joint_pos << std::endl;

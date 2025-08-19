@@ -26,7 +26,7 @@ CTRL_IP = "127.0.0.1"
 CTRL_PORT = 30010
 USE_VIEWER = True
 DT = 0.001
-RENDER_INTERVAL = 1
+RENDER_INTERVAL = 40
 
 URDF_INIT = {
     "CR01B-pro": np.array([0, ] * 29, dtype=np.float32)
@@ -106,6 +106,19 @@ class MuJoCoSimulation:
         self.viewer = None
         if USE_VIEWER:
             self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
+            # Access the camera
+            cam = self.viewer.cam
+
+            # Set the camera's initial position and orientation
+            cam.lookat[0] = 0.0  # x-coordinate of the point to look at
+            cam.lookat[1] = 0.0  # y-coordinate of the point to look at
+            cam.lookat[2] = 1.0  # z-coordinate of the point to look at
+            cam.distance = 5.0   # Distance from the camera to the lookat point
+            cam.azimuth = 15.0   # Horizontal angle (in degrees)
+            cam.elevation = -10.0 # Vertical angle (in degrees)
+
+            # Update the viewer to apply changes
+            self.viewer.sync()
 
 
         # self.shm_phase = shared_memory.SharedMemory(name="phase")  # 连接已有共享内存//确保他们的生存周期为整个进程，防止被回收
