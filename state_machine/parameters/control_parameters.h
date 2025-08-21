@@ -16,6 +16,11 @@
 
 using namespace types;
 
+#include "json.hpp"
+
+using json = nlohmann::json;
+
+
 class ControlParameters
 {
 private:
@@ -23,16 +28,24 @@ private:
     void GenerateCR1LEGParameters();
     void GenerateCR1Parameters();
     void GenerateCR1PROParameters();
+    void GenerateCR1STDParameters();
+
     // void GenerateCR1BParametersFromURDF(const std::string& urdf_file);
     // void ParseURDF(const std::string& urdf_file);
 
 
 public:
     ControlParameters(RobotName robot_name){
+        
         if(robot_name==RobotName::CR1ARM) GenerateCR1ARMParameters();
         else if(robot_name==RobotName::CR1LEG) GenerateCR1LEGParameters();
         else if(robot_name==RobotName::CR1A) GenerateCR1Parameters();
-        else if(robot_name==RobotName::CR1Pro) GenerateCR1PROParameters();//GenerateCR1BParametersFromURDF("/home/tian/Desktop/learn/imation/deploy/rl_deploy/simulation/urdf_model/CR01B-pro/B-20250522.urdf");
+        else if(robot_name==RobotName::CR1Pro) GenerateCR1PROParameters(); 
+        else if(robot_name==RobotName::CR1Standard)
+        {
+            GenerateCR1STDParameters();
+            std::cout<<"dadahuidawaooi;oiewfoiiog"<<std::endl;
+        } 
         else{
             std::cerr << "Not Deafult Robot" << std::endl;
         }

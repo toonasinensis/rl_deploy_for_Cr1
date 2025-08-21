@@ -1,13 +1,14 @@
-/**
- * @file humanoid_state_machine.hpp
- * @brief for robot to switch control state by user command input
- * @author mazunwang
- * @version 1.0
- * @date 2024-05-29
+/*
+ * @Author: Guoganmei
+ * @Date: 2025-08-13 10:17:48
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2025-08-20 14:30:50
+ * @FilePath: /rl_deploy_for_Cr1/state_machine/humanoid/humanoid_state_machine.hpp
+ * @Description: 
  * 
- * @copyright Copyright (c) 2024  DeepRobotics
- * 
+ * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved. 
  */
+ 
 #ifndef HUMANOID_STATE_MACHINE_HPP_
 #define HUMANOID_STATE_MACHINE_HPP_
 
@@ -25,6 +26,10 @@
 #include "hardware/cr1_hardware_interface.hpp"
 #include "hardware/cr1pro_wbc_simlution_interface.hpp"
 #include "hardware/cr1pro_wbc_hardware_interface.hpp"
+
+#include "hardware/cr1std_wbc_simlution_interface.hpp"
+#include "hardware/cr1std_wbc_hardware_interface.hpp"
+
 #include "data_streaming.hpp"
 #include "safe_controller.hpp"
 #include "mimic_ready_state.hpp"
@@ -93,6 +98,22 @@ public:
             #endif
             
         }
+        else if(robot_name_ == RobotName::CR1Standard){
+            #ifdef  SIMULATION_MODE
+                std::cout<<"mamasil"<<std::endl;
+                cp_ptr_ = std::make_shared<ControlParameters>(robot_name_);
+                ri_ptr_ = std::make_shared<CR1_STD_WBC_SimInterface>("CR1standard",cp_ptr_->dof_num_);        
+
+   
+            #else
+                cp_ptr_ = std::make_shared<ControlParameters>(robot_name_);
+
+                ri_ptr_ = std::make_shared<CR1_STD_WBC_HardwareInterface>("CR1STD");        
+   
+            #endif
+            
+        }
+        
         else if(robot_name_ == RobotName::CR1ARM){
             // ri_ptr_ = std::make_shared<CR1ArmHardwareInterface>("CR1ARM");
             // cp_ptr_ = std::make_shared<ControlParameters>(robot_name_);  

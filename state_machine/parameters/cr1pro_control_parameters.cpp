@@ -63,24 +63,17 @@ right_ankle_x_joint       (-0.61087, 0.61087)      31
 ###
 */
 #include "json.hpp"
-struct JointPIDGains {
-    std::vector<double> kp;
-    std::vector<double> kd;
-};
+
 using json = nlohmann::json;
 
-// Load JSON from file
-json load_json(const std::string& filepath) {
+void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，腿，手腕
+    std::string filepath = "../config/config.json";  
     std::ifstream f(filepath);
     if (!f.is_open()) {
         throw std::runtime_error("Could not open file: " + filepath);
-    }
-    return json::parse(f);
-}
+      }
 
-void ControlParameters::GenerateCR1PROParameters(){//b样机只有臂，腰，腿，手腕
-   
-    json data_json = load_json("../config/config.json");
+    json data_json = json::parse(f);
 
     auto kp_waist_json = data_json["pid_gains"]["waist"]["kp"].get<std::vector<float>>();
     auto kp_arm_json = data_json["pid_gains"]["arm"]["kp"].get<std::vector<float>>();

@@ -15,6 +15,7 @@
 #include "policy_runner_base.hpp"
 // #include "humanoid_wbc_policy_runner.hpp"
 #include "cr1pro_wbc_policy_runner.hpp"
+#include "cr1std_wbc_policy_runner.hpp"
 namespace humanoid{
 class RLControlState : public StateBase
 {
@@ -23,7 +24,7 @@ private:
     int state_run_cnt_;
 
     std::shared_ptr<PolicyRunnerBase> policy_ptr_;
-    std::shared_ptr<CR1PROWBCPolicyRunner> humanoid_wbc_policy_;
+    std::shared_ptr<PolicyRunnerBase> humanoid_wbc_policy_;
     std::thread run_policy_thread_;
     bool start_flag_ = true;
 
@@ -51,7 +52,12 @@ private:
                 clock_gettime(CLOCK_MONOTONIC,&start_timestamp);
  
                 auto ra = policy_ptr_->GetRobotAction(rbs_, *(uc_ptr_->GetUserCommand()));
-
+                std::cout<<"RobotAction: " << std::endl;
+                std::cout<<ra.goal_joint_pos.transpose() << std::endl;
+                std::cout<<ra.goal_joint_vel.transpose() << std::endl;
+                std::cout<<ra.kp.transpose() << std::endl;
+                std::cout<<ra.kd.transpose() << std::endl;
+                
                 VecXf joint_pos_lower(cp_ptr_->dof_num_), joint_pos_upper(cp_ptr_->dof_num_);
                 auto left_arm_joint_lower = cp_ptr_->arm_joint_lower_;
                 auto right_arm_joint_lower = cp_ptr_->arm_joint_lower_;//这合理吗??????????
@@ -80,13 +86,13 @@ private:
 
 
                 joint_pos_lower <<cp_ptr_->waist_joint_lower_,left_arm_joint_lower,right_arm_joint_lower,  \
-                left_leg_joint_lower,left_leg_joint_lower,cp_ptr_->neck_joint_lower_;
+                left_leg_joint_lower,left_leg_joint_lower;
 
                 joint_pos_upper <<cp_ptr_->waist_joint_upper_,left_arm_joint_upper,right_arm_joint_upper,  \
-                left_leg_joint_upper,left_leg_joint_upper,cp_ptr_->neck_joint_upper_;
+                left_leg_joint_upper,left_leg_joint_upper;
                  
                 //限幅是为了安全起见，实际策略执行时可以去掉
-                for(int i=0;i<12;++i){
+                for(int i=0;i<cp_ptr_->dof_num_;++i){
                     ra.goal_joint_pos(i) = LimitNumber(ra.goal_joint_pos(i), joint_pos_lower(i), joint_pos_upper(i));
                 }
 
@@ -110,9 +116,18 @@ public:
 
  
             std::memset(&rbs_, 0, sizeof(rbs_));
-            humanoid_wbc_policy_ = std::make_shared<CR1PROWBCPolicyRunner>("common", cp_ptr_->common_policy_path_, 
+            if (robot_name ==  RobotName::CR1Standard)
+            {
+                humanoid_wbc_policy_ = std::make_shared<CR1STDWBCPolicyRunner>("common", cp_ptr_->common_policy_path_, 
                                                                                     cp_ptr_->joint_kp, 
                                                                                     cp_ptr_->joint_kd);
+            }
+            else if (robot_name == RobotName::CR1Pro)
+            {
+                humanoid_wbc_policy_ = std::make_shared<CR1PROWBCPolicyRunner>("common", cp_ptr_->common_policy_path_, 
+                                                                                    cp_ptr_->joint_kp, 
+                                                                                    cp_ptr_->joint_kd);
+            }
             humanoid_wbc_policy_->SetDefaultJointPos(cp_ptr_->default_joint_pos);
             humanoid_wbc_policy_->SetCmdMaxVel(Vec3f(1.0, 0.5, 1.5));
             humanoid_wbc_policy_->DisplayPolicyInfo();

@@ -1,0 +1,158 @@
+/**
+ * @file pybullet_interface.hpp
+ * @brief 
+ * @author wangtian
+ * @version 1.0
+ * @date 2025-aug-20
+ * 
+ * @copyright Copyright (c) 2025  wangtian
+ * 
+ */
+#ifndef CR1STD_WBCHARDWARE_INTERFACE_HPP_
+#define CR1STD_WBCHARDWARE_INTERFACE_HPP_
+
+#include "ecan_hardware_interface.hpp"
+#include "json.hpp"   
+using json = nlohmann::json;
+//TODO: INIT 需要改
+class CR1_STD_WBC_HardwareInterface : public EcanHardwareInterface
+{
+protected:
+    void ResetPositionOffset(){
+        memset(data_updated_, 0, dof_num_*sizeof(bool));
+        this->SetJointCommand(MatXf::Zero(dof_num_, 5));
+        usleep(100*1000);
+        VecXf last_joint_pos = this->GetJointPosition();
+        VecXf current_joint_pos = this->GetJointPosition();
+        int cnt = 0;
+        while (!IsDataUpdatedFinished()){
+            ++cnt;
+            this->RefreshRobotData();
+            current_joint_pos = this->GetJointPosition();
+            // std::cout<<"pos:"<<current_joint_pos.transpose()<<std::endl;
+            for(int i=0;i<dof_num_;++i){
+                if(!data_updated_[i] && current_joint_pos(i) != last_joint_pos(i)){
+                    data_updated_[i] = true;
+                    std::cout << "joint " << i << " data updated at " << cnt << " cnt!" << std::endl;
+                }
+                
+            }
+            last_joint_pos = current_joint_pos;
+            usleep(1000);
+            if(cnt > 10000){
+                std::cout << "joint data update is not finished\n";
+            }
+        }
+        // for(int i=1;i<dof_num_;i+=3){
+        //     if(current_joint_pos(i) > Deg2Rad(210)){//肘关节自然垂下为90度，原来的90度作判定容易导致肘关节offset变化导致超限
+        //         pos_offset_[i] = pos_offset_[i] - 360.;
+        //         std::cout << "joint " << i << " offset is changed\n";
+        //     }
+        //     if(current_joint_pos(i) < Deg2Rad(-210)){
+        //         pos_offset_[i] = pos_offset_[i] + 360.;
+        //         std::cout << "joint " << i << " offset is changed\n";
+        //     }
+        // }
+    }
+
+public:
+    CR1_STD_WBC_HardwareInterface(const std::string& robot_name):EcanHardwareInterface(robot_name,31){
+        // float init_pos_offset[12] =                             
+        //                     {-0., 0., -0., -10., -0., -0.,
+        //                      -0., 0., -0., -10., -0., -0.};
+        // float joint_dir[12] = {-1, -1, 1, 1, 1, -1,
+        //                         1, -1, 1, -1, -1, -1};
+        // float init_pos_offset[26] =                             
+        //                     {-0., 0., -0., -10., -0., -0.,
+        //                      -0., 0., -0., -10., -0., -0.,
+        //                      -0., 0., -0., -0., -0., -0., -0.,
+        //                      -0., 0., -0., -0., -0., -0., -0.};
+        // float joint_dir[26] = {-1, -1, 1, 1, 1, -1,
+        //                         1, -1, 1, -1, -1, -1,
+        //                         1, -1, 1, 1, 1, 1, 1,
+        //                         -1, 1, 1, -1, 1, 1, 1};
+         std::ifstream input_file("../config/config.json");
+        json config;
+        input_file>>config;
+        std::vector<float> saved_offet_pos;
+        if(config.contains("offset_data"))
+        {
+        std::cout<<"use save offset !!!"<<std::endl;
+
+          saved_offet_pos = config["offset_data"].get<std::vector<float>>();
+        }
+        else{
+            std::cout<<"init zeros offset"<<std::endl;
+            saved_offet_pos = std::vector<float>(21,0.f); 
+            config["offset_data"]  = saved_offet_pos;
+        }
+
+
+        float init_pos_offset[21] = {100.,//腰 wristX Y限位太难标了，标在0，相对准确
+                                    90., -0., 170., -44.,//左手
+                                    90., 0., -170., -44.,//右手
+                                    0*90., -25., -30., -10., 45., 35.,//左腿
+                                    0*90., 25., 30., -10., 45., -35.,//右腿
+                                    };//头
+        float joint_dir[21] = { -1,//腰
+                                -1, 1, 1, -1,//左手
+                                1, 1, 1, -1,//右手
+                                1, -1, 1, -1, -1, -1,//左腿
+                                -1, 1, 1, -1, -1, -1,//右腿
+                                };
+
+
+        
+
+        if(31!=saved_offet_pos.size())
+        {
+            std::cout<<"saved_offet_pos err!!"<<std::endl;
+        }
+
+        for (int i=0;i<saved_offet_pos.size();i++)
+        {
+            init_pos_offset[i]-= Rad2Deg(saved_offet_pos[i]);
+        }
+
+
+        // float init_pos_offset[21] = {100.,//腰 wristX Y限位太难标了，标在0，相对准确
+        //                             90., -25., 170., -44.,//左手
+        //                             90., 25., -170., -44.,//右手
+        //                             0*90., -25., -30., -10., 45., 35.,//左腿
+        //                             0*90., 25., 30., -10., 45., -35.//右腿
+        //                            };
+        // float joint_dir[21] = { -1,//腰
+        //                         -1, 1, 1, -1, //左手
+        //                         1, 1, 1, -1, //右手
+        //                         1, -1, 1, -1, -1, -1,//左腿
+        //                         -1, 1, 1, -1, -1, -1,//右腿
+        //                         };
+        for(int i=0;i<dof_num_;++i){
+            pos_offset_[i] = init_pos_offset[i];
+            joint_dir_[i] = joint_dir[i];
+            data_updated_[i] = false;
+            joint_config_[i].dir = joint_dir_[i];
+            joint_config_[i].offset = Deg2Rad(pos_offset_[i]);
+        }
+        for(int i=0;i<31;i++)
+        {
+        std::cout<<"after change"<<pos_offset_[i]<<std::endl;
+
+        }
+    }
+    ~CR1_STD_WBC_HardwareInterface(){}
+
+    virtual void Start(){
+        time_stamp_ = GetTimestampMs();
+        ResetPositionOffset();
+    }
+
+    virtual void Stop(){
+    }
+};
+
+
+
+
+
+#endif

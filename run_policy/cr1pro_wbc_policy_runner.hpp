@@ -1,11 +1,11 @@
 /**
  * @file jueying_common_policy_runner.hpp
- * @brief common policy runner for jueying
- * @author mazunwang
+ * @brief common policy runner for cr1PRO
+ * @author wangtian
  * @version 1.0
  * @date 2024-06-06
  * 
- * @copyright Copyright (c) 2024  DeepRobotics
+ * @copyright Copyright (c) 2024  wangtian
  * 
  */
 
@@ -324,7 +324,7 @@ public:
         0.502f, 1.411f, 1.441f;
 
         joint_pos_rl = joint_pos_rl - joint_pos_default;
-        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, phase_vec; //my_vec;
+        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl,last_action_,phase_vec; //my_vec;
 
         // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
         // std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;

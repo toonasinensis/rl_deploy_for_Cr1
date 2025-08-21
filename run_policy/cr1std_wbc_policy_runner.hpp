@@ -1,40 +1,29 @@
 /**
  * @file jueying_common_policy_runner.hpp
- * @brief common policy runner for jueying
- * @author mazunwang
+ * @brief common policy runner for cr1 std
+ * @author wangtian
  * @version 1.0
  * @date 2024-06-06
  * 
- * @copyright Copyright (c) 2024  DeepRobotics
+ * @copyright Copyright (c) 2024  wangtian
  * 
  */
 
-#ifndef CR1PRO_WBC_POLICY_RUNNER_HPP_
-#define CR1PRO_WBC_POLICY_RUNNER_HPP_
+#ifndef CR1STD_WBC_POLICY_RUNNER_HPP_
+#define CR1STD_WBC_POLICY_RUNNER_HPP_
 
 #include "policy_runner_base.hpp"
-#include "ShmReader.hpp"
 
 #include <chrono>
 
 #include "json_loader.hpp"
-
-class CR1PROWBCPolicyRunner : public PolicyRunnerBase
+// #define SIMULATION_MODE
+class CR1STDWBCPolicyRunner : public PolicyRunnerBase
 {
 private:
     VecXf kp_, kd_;
     VecXf dof_pos_default_; //dof_pos
     Vec3f max_cmd_vel_;
-    // int cap_num = 22;
-    // ShmFloatReader des_joint_read("/shm_joint", 29);  // float 数量为 12
-    // ShmFloatReader des_rot_r("/shm_rot", 4);  // float 数量为 12
-    // ShmFloatReader des_cp_r("/shm_cp", 22*3);  // float 数量为 12
-    // ShmFloatReader des_z_r("/shm_z", 1);  // float 数量为 12
-
-     // std::unique_ptr<ShmFloatReader> des_rot_r;
-    // std::unique_ptr<ShmFloatReader> des_cp_r;
-    // std::unique_ptr<ShmFloatReader> des_z_r;
-    // std::vector<c10::IValue> obs_vector_{};
 
     const std::string policy_path_;
 
@@ -46,9 +35,8 @@ private:
 
     int obs_dim_, obs_history_num_, act_dim_;
     // int obs_history_num_ = 5;
-    int dof_dim = 31;
+    int dof_dim = 21;
     int obs_total_dim_;
-    int capture_point_num_ = 22;
     VecXf current_observation_;
     VecXf obs_buff;
     VecXf action_, last_action_, action_all_rl, action_all_rbt;//后面两个分别是rl顺序和rbt顺序
@@ -69,21 +57,20 @@ private:
 
     RobotAction ra;
     std::vector<std::string> robot_order = {
-    "waist_z_joint", "waist_x_joint", "waist_y_joint",
+    "waist_z_joint",
     "left_shoulder_y_joint", "left_shoulder_x_joint", "left_shoulder_z_joint",
-    "left_elbow_joint", "left_wrist_z_joint", "left_wrist_y_joint", "left_wrist_x_joint",
+    "left_elbow_joint", 
     "right_shoulder_y_joint", "right_shoulder_x_joint", "right_shoulder_z_joint",
-    "right_elbow_joint", "right_wrist_z_joint", "right_wrist_y_joint", "right_wrist_x_joint",
+    "right_elbow_joint", 
     "left_hip_y_joint", "left_hip_x_joint", "left_hip_z_joint",
     "left_knee_joint", "left_ankle_y_joint", "left_ankle_x_joint",
     "right_hip_y_joint", "right_hip_x_joint", "right_hip_z_joint",
-    "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint","neck1","neck2"
-};
-
+    "right_knee_joint", "right_ankle_y_joint", "right_ankle_x_joint"
+    };
     std::vector<std::string> policy_order = {
         "left_hip_y_joint", "right_hip_y_joint", "waist_z_joint",
-        "left_hip_x_joint", "right_hip_x_joint", "waist_x_joint",
-        "left_hip_z_joint", "right_hip_z_joint", "waist_y_joint",
+        "left_hip_x_joint", "right_hip_x_joint", 
+        "left_hip_z_joint", "right_hip_z_joint", 
         "left_knee_joint", "right_knee_joint", "left_shoulder_y_joint", "right_shoulder_y_joint",
         "left_ankle_y_joint", "right_ankle_y_joint",
         "left_shoulder_x_joint", "right_shoulder_x_joint",
@@ -93,12 +80,10 @@ private:
     };
 
     std::vector<std::string> pd_order = {
-        "left_wrist_z_joint", "left_wrist_y_joint", "left_wrist_x_joint",
-        "right_wrist_z_joint", "right_wrist_y_joint", "right_wrist_x_joint","neck1","neck2"
     };
-    std::vector<std::string> policy_and_pd_order;// = {'left_hip_y_joint', 'right_hip_y_joint', 'waist_z_joint', 'left_hip_x_joint', 'right_hip_x_joint', 'waist_x_joint', 'left_hip_z_joint', 'right_hip_z_joint', 'waist_y_joint', 'left_knee_joint', 'right_knee_joint', 'left_shoulder_y_joint', 'right_shoulder_y_joint', 'left_ankle_y_joint', 'right_ankle_y_joint', 'left_shoulder_x_joint', 'right_shoulder_x_joint', 'left_ankle_x_joint', 'right_ankle_x_joint', 'left_shoulder_z_joint', 'right_shoulder_z_joint', 'left_elbow_joint', 'right_elbow_joint'};    // B
-    std::vector<float> values;             // values in A
 
+    std::vector<std::string> policy_and_pd_order;// = {'left_hip_y_joint', 'right_hip_y_joint', 'waist_z_joint', 'left_hip_x_joint', 'right_hip_x_joint', 'waist_x_joint', 'left_hip_z_joint', 'right_hip_z_joint', 'waist_y_joint', 'left_knee_joint', 'right_knee_joint', 'left_shoulder_y_joint', 'right_shoulder_y_joint', 'left_ankle_y_joint', 'right_ankle_y_joint', 'left_shoulder_x_joint', 'right_shoulder_x_joint', 'left_ankle_x_joint', 'right_ankle_x_joint', 'left_shoulder_z_joint', 'right_shoulder_z_joint', 'left_elbow_joint', 'right_elbow_joint'};    // B
+ 
     std::vector<int> robot2policy_idx;
     std::vector<int> policyandpd2robot_idx;
 
@@ -113,11 +98,12 @@ private:
 
      int data_cnt=0;
     std::chrono::time_point<std::chrono::high_resolution_clock> last_time ;
+    std::chrono::time_point<std::chrono::high_resolution_clock> state_start_time ;
 
 
 public:
-    CR1PROWBCPolicyRunner(const std::string& policy_name, const std::string& policy_path, const VecXf& kp, const VecXf& kd):
-    PolicyRunnerBase(policy_name), policy_path_(policy_path),env_(ORT_LOGGING_LEVEL_WARNING, "CR1PROWBCPolicyRunner"),
+    CR1STDWBCPolicyRunner(const std::string& policy_name, const std::string& policy_path, const VecXf& kp, const VecXf& kd):
+    PolicyRunnerBase(policy_name), policy_path_(policy_path),env_(ORT_LOGGING_LEVEL_WARNING, "CR1STDWBCPolicyRunner"),
     session_options_{},
     session_{nullptr},
     memory_info_(Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault))
@@ -136,9 +122,9 @@ public:
         // 加载模型
         session_ = Ort::Session(env_, policy_path_.c_str(), session_options_);
 
-        obs_dim_ = 98;
-        obs_total_dim_ = 490;
-        act_dim_ = 23;
+        obs_dim_ = 90; // 98;
+        obs_total_dim_ = 450;// 490;
+        act_dim_ = 21;
         obs_history_num_ = 5;
         assert(obs_dim_ * obs_history_num_ == obs_total_dim_);
         generate_permutation(robot_order,policy_order);
@@ -171,6 +157,14 @@ public:
         ra.tau_ff.setZero();
         ra.goal_joint_vel.setZero();
 
+        // ra.kp.setZero();
+        // ra.kd.setZero();
+        // ra.goal_joint_pos.setZero();
+        // ra.tau_ff[0] = 1.0;
+        // ra.tau_ff[1] = 1.0;
+        // ra.tau_ff[2] = 1.0;
+        // ra.tau_ff[27] = 1.0;
+
         policy_and_pd_order = policy_order;   //+pd_order;
         policy_and_pd_order.insert(policy_and_pd_order.end(), pd_order.begin(), pd_order.end());
 
@@ -192,7 +186,7 @@ public:
      }
 
     }
-    ~CR1PROWBCPolicyRunner(){}
+    ~CR1STDWBCPolicyRunner(){}
 
     std::vector<int> generate_permutation(
         const std::vector<std::string>& from, 
@@ -228,6 +222,7 @@ public:
         run_cnt_ = 0;
         cmd_vel_input_.setZero();
         last_time = std::chrono::high_resolution_clock::now();
+        state_start_time = std::chrono::high_resolution_clock::now();
         data_cnt = 0;
     }
 
@@ -264,6 +259,19 @@ public:
  
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(this_time - last_time).count();
         last_time = this_time;
+        auto phase_time = std::chrono::duration_cast<std::chrono::milliseconds>(this_time - state_start_time).count();
+
+         // std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;
+        if( data_cnt >= joint_data.size())
+        {
+            data_cnt = 0;//保持最后一帧数据
+            
+        }
+
+        auto joint_data_now = joint_data.at(data_cnt);
+
+        auto phase = (float)phase_time / (float) (joint_data.size() * 20);
+        Vec4f phase_vec = Vec4f({sin(2 * M_PI * phase), cos(2 * M_PI * phase), sin(4 * M_PI * phase), cos(4 * M_PI * phase)});
 
             std::cout << std::fixed << std::setprecision(3)\
               << "Elapsed: " << duration << " ms" << std::endl;
@@ -278,14 +286,7 @@ public:
         VecXf joint_vel_rl = VecXf(act_dim_);
         VecXf joint_pos_default = VecXf(act_dim_);// in rl squenece
 
-        // std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;
-        if( data_cnt >= joint_data.size())
-        {
-            data_cnt = 0;//保持最后一帧数据
-            
-        }
-
-        auto joint_data_now = joint_data.at(data_cnt);
+        // std::cout<<"data_cnt"<<data_cnt<<"joint_data.size()"<<joint_data.size()<<std::endl;   
 
         for (int i =0;i<act_dim_;i++)
         {
@@ -295,22 +296,9 @@ public:
         }
 
         current_observation_.setZero(obs_dim_); // 你这里应该用 obs_total_dim_
-        // std::vector<float> des_joint_r =(* des_joint_read).read();
-        // Eigen::VectorXf des_joint_ = Eigen::Map<Eigen::VectorXf>(des_joint_r.data(), des_joint_r.size());//考虑到这个是映射内存，重新复制
-        // Eigen::VectorXf des_joint = des_joint_ * obs_scales_joint_pos;
-        VecXf my_vec(23);  // 如果你知道有多少个元素，直接初始化大小
-        // my_vec << 
-        //     -0.111412f, -0.153612f, 0.00538459f, 0.00760133f, -0.0466025f, 0.0491322f,
-        //     0.146957f, -0.165495f, 0.234234f, 0.256933f, 0.325049f, -0.107587f,
-        //     -0.118877f, -0.0637089f, -0.0537505f, 0.534397f, -0.516656f, 0.065583f,
-        //     -0.0303705f, -0.430121f, 0.287803f, 1.24668f, 1.23028f;
-        my_vec << 
-        -0.063f, -0.144f, -0.014f, -0.057f, 0.037f, 0.049f, -0.019f, -0.168f, 0.002f, 0.008f,
-        0.186f, -0.246f, -0.328f, 0.079f, 0.04f, 0.161f, -0.137f, 0.058f, 0.09f, -0.328f,
-        0.502f, 1.411f, 1.441f;
 
         joint_pos_rl = joint_pos_rl - joint_pos_default;
-        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl, last_action_, my_vec;
+        current_observation_<<base_omgea, projected_gravity, joint_pos_rl, joint_vel_rl,last_action_,joint_data_now; //my_vec;
 
         // std::cout<<"base_omgea"<<base_omgea.transpose()<<std::endl;
         // std::cout<<"projected_gravity"<<projected_gravity.transpose()<<std::endl;
@@ -327,12 +315,16 @@ public:
         //
         
         action_ = Onnx_infer(obs_buff);
-        
+        if(action_.array().hasNaN()) {
+            std::cout << "action exist NaN" << std::endl;
+            exit(0);
+        }
+
         std::cout<<"action_"<<action_.transpose()<<std::endl;
         VecXf no_rl_joint_action = VecXf::Zero(dof_dim - act_dim_);
-        action_all_rl << action_, no_rl_joint_action;//把输出为0的，放在后面
+        action_all_rl << action_;//把输出为0的，放在后面
         
-        // action_all_rl << joint_data_now, no_rl_joint_action;//假的输入
+        // action_all_rl << joint_data_now;//假的输入
 
         last_action_ = action_;
         for(int i = 0;i<dof_dim;i++)
@@ -345,10 +337,12 @@ public:
 
         ra.goal_joint_vel.setZero();
         auto next_time = std::chrono::high_resolution_clock::now();
-        // ra.tau_ff(0) = 999;
+        #ifdef SIMULATION_MODE
+        ra.tau_ff(0) = 999;
+        #endif
         auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(next_time - this_time).count();
-            // std::cout << std::fixed << std::setprecision(4)\
-            //   << "infer Elapsed: " << duration2 << " us" << std::endl;
+            std::cout << std::fixed << std::setprecision(4)\
+              << "infer Elapsed: " << duration2 << " us" << std::endl;
         return ra;
     }
 

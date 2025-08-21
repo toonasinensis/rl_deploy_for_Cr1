@@ -97,6 +97,7 @@ public:
             kp_<<cp_ptr_->waist_kp_pc, cp_ptr_->arm_kp_pc, cp_ptr_->arm_kp_pc, cp_ptr_->leg_kp_pc, cp_ptr_->leg_kp_pc, cp_ptr_->neck_kp_pc;
             kd_<<cp_ptr_->waist_kd_pc, cp_ptr_->arm_kd_pc, cp_ptr_->arm_kd_pc, cp_ptr_->leg_kd_pc, cp_ptr_->leg_kd_pc, cp_ptr_->neck_kd_pc;
         }else if(cp_ptr_->dof_num_ == 21) {
+            // std::cout<<"dof_num_ is 21"<<std::endl;
             kp_<<cp_ptr_->waist_kp_pc,cp_ptr_->arm_kp_pc,cp_ptr_->arm_kp_pc, cp_ptr_->leg_kp_pc,cp_ptr_->leg_kp_pc;
             kd_<<cp_ptr_->waist_kd_pc,cp_ptr_->arm_kd_pc,cp_ptr_->arm_kd_pc, cp_ptr_->leg_kd_pc,cp_ptr_->leg_kd_pc;
         }else{
@@ -106,7 +107,7 @@ public:
         // std::cout<<"---------info-----------"<<std::endl;
         // std::cout<<kp_.transpose()<<std::endl;
         // std::cout<<kd_.transpose()<<std::endl;
-        // std::cout<<amplitude_.transpose()<<std::endl;
+        // // std::cout<<amplitude_.transpose()<<std::endl;
         // std::cout<<planning_joint_vel.transpose()<<std::endl;
         // std::cout<<"--------info end---------"<<std::endl;
 

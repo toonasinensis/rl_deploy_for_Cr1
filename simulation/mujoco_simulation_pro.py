@@ -42,6 +42,10 @@ virtual_joint_num = {
     "CR1STANDARD": 0,
 }
 
+
+q_offset = np.array([0, ] * 29, dtype=np.float32)
+q_offset[2] = -10.0/57.3   #主动加10度offset到waist y上
+
 import json
 import copy
 
@@ -157,7 +161,7 @@ class MuJoCoSimulation:
                 step += 1
                 # 控制律
                 # print("self.arr_phase[0]", self.arr_phase[0])
-                if self.tau_ff[0] > 88   :
+                if self.tau_ff[0] > 88:
                     self._apply_joint_torque()
                 else:
                     self._apply_joint_torque()
@@ -175,9 +179,7 @@ class MuJoCoSimulation:
                     self.viewer.sync()
                     t2 = time.time()
                     # print(t2-t1)
-                #
-                # 
-            
+
              # dt = time.perf_counter() - t0
             # if dt < DT:
             #     time.sleep(DT - dt)
@@ -229,7 +231,11 @@ class MuJoCoSimulation:
         # 当前关节状态#TODO:
         q = self.data.qpos[ 7:7+self.dof_num].reshape(-1, 1)
         dq = self.data.qvel[ 6:6+ self.dof_num].reshape(-1, 1)
-
+        # import ipdb;ipdb.set_trace();
+        q  = q.copy()
+        # print("q.shape()",q.shape)
+        # print( "q_offset", q_offset.shape )
+        q = q + q_offset.reshape(-1, 1)
         # τ = kp*(q_d - q) + kd*(dq_d - dq) + τ_ff
         self.input_tq = (
                 self.kp_cmd * (self.pos_cmd - q) +
@@ -237,15 +243,16 @@ class MuJoCoSimulation:
                # self.tau_ff
         )
         # # 调试
-        print("=== [Joint Command Debug] ===")
-        print(f"[Target Pos]:\n{self.pos_cmd.T}")
-        print(f"[Actual Pos]:\n{q.T}")
-        print(f"[Target Vel]:\n{self.vel_cmd.T}")
-        print(f"[Actual Vel]:\n{dq.T}")
-        print(f"[Kp Term]:\n{self.kp_cmd.T}")
-        print(f"[Kd Term]:\n{self.kd_cmd.T}")
-        print(f"[Feedforward Tau]:\n{self.tau_ff.T}")
-        print(f"[Final Torque Output]:\n{self.input_tq.T}")
+        # print(self.input_tq[0])
+        # print("=== [Joint Command Debug] ===")
+        # print(f"[Target Pos]:\n{self.pos_cmd.T}")
+        # print(f"[Actual Pos]:\n{q.T}")
+        # print(f"[Target Vel]:\n{self.vel_cmd.T}")
+        # print(f"[Actual Vel]:\n{dq.T}")
+        # print(f"[Kp Term]:\n{self.kp_cmd.T}")
+        # print(f"[Kd Term]:\n{self.kd_cmd.T}")
+        # print(f"[Feedforward Tau]:\n{self.tau_ff.T}")
+        # print(f"[Final Torque Output]:\n{self.input_tq.T}")
 
         # 写入 control 缓冲区
         self.data.ctrl[:] = self.input_tq.flatten()
@@ -328,7 +335,9 @@ class MuJoCoSimulation:
         #     dq.astype(np.float32),
         #     tau.astype(np.float32)
         # ))
-        
+        q = q.copy()
+        q = q + q_offset
+        # print(q)
         payload = np.concatenate([
             [self.timestamp],
             rpy.flatten(),

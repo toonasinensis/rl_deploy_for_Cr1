@@ -1,3 +1,11 @@
+/*
+ * @@Author: Guoganmei
+ * @@Date: Do not edit
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2025-08-20 16:37:42
+ * 
+ * Copyright (c) 2025 by 2370042022@qq.com, All Rights Reserved. 
+ */
 /**
  * @file policy_runner_base.hpp
  * @brief policy runner base class
@@ -30,7 +38,12 @@ public:
      */
     virtual void DisplayPolicyInfo() = 0;
 
-    /**
+
+
+    virtual void SetDefaultJointPos(const VecXf& pos) = 0;
+    virtual void SetCmdMaxVel(const Vec3f& vel) = 0;
+ 
+     /**
      * @brief Get the robot action object by run your policy
      * @return RobotAction 
      */
