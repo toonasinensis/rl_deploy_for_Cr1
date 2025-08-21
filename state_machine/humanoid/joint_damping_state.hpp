@@ -1,3 +1,11 @@
+/*
+ * @@Author: Guoganmei
+ * @@Date: Do not edit
+ * @@LastEditors: Guogan mei
+ * @@LastEditTime: Guogan mei
+ * 
+ * Copyright (c) 2025 by 2370042022@qq.com, All Rights Reserved. 
+ */
 /**
  * @file joint_damping_state.hpp
  * @brief joint passive control state
@@ -24,7 +32,14 @@ public:
             VecXf kd_ = VecXf::Zero(cp_ptr_->dof_num_);
             std::cout<<"kd_.size("<<kd_.size()<<"w"<<cp_ptr_->waist_kd.size() <<"arm "<<cp_ptr_->arm_kd.size()<<cp_ptr_->leg_kd.size()\
             <<" cp_ptr_->neck_kd;"<< cp_ptr_->neck_kd.size()<<std::endl;
+            if(cp_ptr_->dof_num_ == 31)
+            {
             kd_<<cp_ptr_->waist_kd ,cp_ptr_->arm_kd,cp_ptr_->arm_kd, cp_ptr_->leg_kd, cp_ptr_->leg_kd, cp_ptr_->neck_kd;
+            }
+            else if(cp_ptr_->dof_num_ == 21) 
+            {
+            kd_<<cp_ptr_->waist_kd ,cp_ptr_->arm_kd,cp_ptr_->arm_kd, cp_ptr_->leg_kd, cp_ptr_->leg_kd;
+            }
             joint_cmd_ = MatXf::Zero(cp_ptr_->dof_num_, 5);
             joint_cmd_.col(2) = kd_;
         }

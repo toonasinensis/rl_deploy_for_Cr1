@@ -56,7 +56,7 @@ protected:
     }
 
 public:
-    CR1_STD_WBC_HardwareInterface(const std::string& robot_name):EcanHardwareInterface(robot_name,31){
+    CR1_STD_WBC_HardwareInterface(const std::string& robot_name):EcanHardwareInterface(robot_name,21){
         // float init_pos_offset[12] =                             
         //                     {-0., 0., -0., -10., -0., -0.,
         //                      -0., 0., -0., -10., -0., -0.};
@@ -83,7 +83,7 @@ public:
         }
         else{
             std::cout<<"init zeros offset"<<std::endl;
-            saved_offet_pos = std::vector<float>(21,0.f); 
+            saved_offet_pos = std::vector<float>(dof_num_,0.f); 
             config["offset_data"]  = saved_offet_pos;
         }
 
@@ -104,7 +104,7 @@ public:
 
         
 
-        if(31!=saved_offet_pos.size())
+        if(dof_num_!=saved_offet_pos.size())
         {
             std::cout<<"saved_offet_pos err!!"<<std::endl;
         }
@@ -134,7 +134,7 @@ public:
             joint_config_[i].dir = joint_dir_[i];
             joint_config_[i].offset = Deg2Rad(pos_offset_[i]);
         }
-        for(int i=0;i<31;i++)
+        for(int i=0;i<dof_num_;i++)
         {
         std::cout<<"after change"<<pos_offset_[i]<<std::endl;
 
